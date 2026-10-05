@@ -1,41 +1,45 @@
-Compiling with 24 processes for target haswell.
-==================== Finding GCC from system paths ====================
-path to gcc is /local_scratch/software/gcc/11.2.0/b2/bin/gcc
-path to g++ is /local_scratch/software/gcc/11.2.0/b2/bin/g++
-path to gfortran is /local_scratch/software/gcc/11.2.0/b2/bin/gfortran
-Found include directory /usr/include
-Found lib directory /local_scratch/software/gcc/11.2.0/b2/lib64
-Step gcc took 1.00 seconds.
-Step intel took 0.00 seconds.
-==================== Getting proc arch info using OpenBLAS tools ====================
-OpenBLAS-0.3.25.tar.gz is found
-OpenBLAS detected LIBCORE = haswell
-OpenBLAS detected ARCH    = x86_64
-==================== Installing CMake ====================
-cmake-3.28.1-linux-x86_64.sh is found
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/cmake-3.28.1
-Step cmake took 271.00 seconds.
-==================== Installing OpenMPI ====================
-openmpi-4.1.5.tar.gz is found
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5
-Found directory /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/bin
-Found directory /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/lib
-Found directory /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/include
-mpiexec is installed as /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/bin/mpiexec
-mpicc is installed as /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/bin/mpicc
-mpicxx is installed as /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/bin/mpicxx
-mpifort is installed as /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/bin/mpifort
-Step openmpi took 414.00 seconds.
-==================== Installing OpenBLAS ====================
-OpenBLAS-0.3.25.tar.gz is found
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openblas-0.3.25
-Installing OpenBLAS library for target HASWELL
-Step openblas took 122.00 seconds.
-==================== Installing FFTW ====================
-fftw-3.3.10.tar.gz is found
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/fftw-3.3.10
-Step fftw took 38.00 seconds.
-==================== Installing LIBINT ====================
-libint-v2.6.0-cp2k-lmax-5.tgz is found
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/libint-v2.6.0-cp2k-lmax-5
+wget  --quiet https://www.cp2k.org/static/downloads/COSMA-v2.6.6.tar.gz
+COSMA-v2.6.6.tar.gz: OK
+Checksum of COSMA-v2.6.6.tar.gz Ok
+wget  --quiet https://www.cp2k.org/static/downloads/COSTA-v2.2.2.tar.gz
+COSTA-v2.2.2.tar.gz: OK
+Checksum of COSTA-v2.2.2.tar.gz Ok
+wget  --quiet https://www.cp2k.org/static/downloads/Tiled-MM-v2.2.tar.gz
+Tiled-MM-v2.2.tar.gz: OK
+Checksum of Tiled-MM-v2.2.tar.gz Ok
+Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/COSMA-2.6.6
+Step cosma took 27.00 seconds.
+==================== Installing ELPA ====================
+wget  --quiet https://www.cp2k.org/static/downloads/elpa-2023.05.001.tar.gz
+elpa-2023.05.001.tar.gz: OK
+Checksum of elpa-2023.05.001.tar.gz Ok
+Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/elpa-2023.05.001/cpu
+/usr/bin/env: python3: No such file or directory
+Step elpa took 76.00 seconds.
+Step ptscotch took 0.00 seconds.
+Step superlu took 0.00 seconds.
+Step pexsi took 0.00 seconds.
+Step quip took 0.00 seconds.
+==================== Installing gsl ====================
+wget  --quiet https://www.cp2k.org/static/downloads/gsl-2.7.tar.gz
+gsl-2.7.tar.gz: OK
+Checksum of gsl-2.7.tar.gz Ok
+Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/gsl-2.7
+Step gsl took 62.00 seconds.
+Step plumed took 0.00 seconds.
+==================== Installing hdf5 ====================
+wget  --quiet https://www.cp2k.org/static/downloads/hdf5-1.14.2.tar.bz2
+hdf5-1.14.2.tar.bz2: OK
+Checksum of hdf5-1.14.2.tar.bz2 Ok
+Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/hdf5-1.14.2
+tar (child): lbzip2: Cannot exec: No such file or directory
+tar (child): Error is not recoverable: exiting now
+tar: Child returned status 2
+tar: Error is not recoverable: exiting now
+ERROR: (./scripts/stage7/install_hdf5.sh, line 38) Non-zero exit code detected.
+TOOLCHAIN FAILED
 
+tar (child): Error is not recoverable: exiting now
+tar: Error is not recoverable: exiting now
+ERROR: (./scripts/stage7/install_hdf5.sh, line 38) Non-zero exit code detected.
+TOOLCHAIN FAILED
