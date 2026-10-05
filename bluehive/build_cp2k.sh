@@ -19,6 +19,12 @@ SSH="ssh -o BatchMode=yes -o ConnectTimeout=10"
 R=bluehive/reports
 cmd=${1:-}; shift || true
 
+run_test() {   # copy the test input + script to node $1 and run it there (stdin closed: mpirun reads stdin)
+  $SSH $1 "mkdir -p /home/$USER/dtbubp_test" && \
+  scp -q bluehive/cp2k_test/ch4.inp bluehive/cp2k_test/run_ch4.sh $1:/home/$USER/dtbubp_test/ && \
+  $SSH $1 "bash -l /home/$USER/dtbubp_test/run_ch4.sh" < /dev/null
+}
+
 case "$cmd" in
 fetch)
   mkdir -p $SRC/pkgs && cd $SRC
@@ -96,22 +102,9 @@ log)
   git add $R/build_cp2k_log.txt && git commit -qm "CP2K build log ($H)" && git push -q && echo pushed
   ;;
 test)
-  # methane PBE-D3(BJ)/TZV2P on one node: two concurrent 4-rank runs on disjoint cores (the label packing),
-  # plus a 1-rank run to check the serial path. No copying. Usage: bash bluehive/build_cp2k.sh test bhx0123
+  # methane PBE-D3(BJ)/TZV2P on one node, nothing copied. Usage: bash bluehive/build_cp2k.sh test bhx0123
   H=$1; OUT=$R/build_cp2k_test_$H.txt
-  $SSH $H "mkdir -p /home/$USER/dtbubp_test" && scp -q bluehive/cp2k_test/ch4.inp $H:/home/$USER/dtbubp_test/
-  $SSH $H bash -l -s > $OUT 2>&1 <<TEST
-echo "# CP2K test on \$(hostname) \$(date -Is)"
-source $DEST/cp2k-2024.1.env; export OMP_NUM_THREADS=1
-echo "cp2k: \$(which cp2k.psmp)  mpirun: \$(which mpirun)"; ldd \$(which cp2k.psmp) | grep "not found"
-cd /home/$USER/dtbubp_test
-for i in 0 1 s; do rm -rf trun\$i; mkdir -p trun\$i && cp ch4.inp trun\$i/; done
-( cd trun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
-( cd trun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
-wait
-( cd truns && cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null )
-for i in 0 1 s; do echo "== trun\$i"; grep -E "CP2K\| version string|Data directory path|Total number of message passing|ENERGY\| Total|PROGRAM ENDED|ABORT|CP2K +1 " trun\$i/ch4.out; grep -A4 "STRESS| Analytical stress tensor" trun\$i/ch4.out | head -5; tail -3 trun\$i/run.log; done
-TEST
+  run_test $H > $OUT 2>&1
   cat $OUT
   git add $OUT && git commit -qm "CP2K build test on $H" && git push -q && echo pushed
   ;;
@@ -126,19 +119,7 @@ deploy)
     echo "## copy -> $h"
     $SSH $h "mkdir -p $DEST" && rsync -a -e "$SSH" $STAGE/ $h:$DEST/ && echo ok
   done
-  for h in $H $OTHERS; do
-    echo "## methane test on $h"
-    $SSH $h "mkdir -p /home/$USER/dtbubp_test" && scp -q bluehive/cp2k_test/ch4.inp $h:/home/$USER/dtbubp_test/
-    $SSH $h bash -l -s <<TEST
-source $DEST/cp2k-2024.1.env; export OMP_NUM_THREADS=1
-cd /home/$USER/dtbubp_test
-for i in 0 1; do mkdir -p brun\$i && cp ch4.inp brun\$i/; done
-( cd brun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
-( cd brun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
-wait
-for i in 0 1; do echo "== brun\$i"; grep -E "ENERGY\| Total|PROGRAM ENDED|Analytical stress|ABORT|CP2K +1 " brun\$i/ch4.out; tail -4 brun\$i/run.log; done
-TEST
-  done
+  for h in $H $OTHERS; do echo "## methane test on $h"; run_test $h; done
   } > $OUT 2>&1
   cat $OUT
   git add $OUT && git commit -qm "CP2K build deployed + tested" && git push -q && echo pushed
