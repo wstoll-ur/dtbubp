@@ -1,0 +1,34 @@
+# multinode check 2026-10-05T15:33:27-04:00; first node bhx0123; nodes bhx0123 bhx0124 bhx0125
+## bhx0123: interfaces / InfiniBand
+no_IB
+eno1 speed 10000 Mb/s
+eno1.23 speed 10000 Mb/s
+eno2 speed  Mb/s
+## bhx0124: interfaces / InfiniBand
+no_IB
+eno1 speed 10000 Mb/s
+eno1.23 speed 10000 Mb/s
+eno2 speed  Mb/s
+## bhx0125: interfaces / InfiniBand
+no_IB
+eno1 speed 10000 Mb/s
+eno1.23 speed 10000 Mb/s
+eno2 speed  Mb/s
+## ssh from bhx0123 to the others (must print hostnames without asking for a password)
+command-line line 0: unsupported option "accept-new".
+command-line line 0: unsupported option "accept-new".
+command-line line 0: unsupported option "accept-new".
+## 3-node hostname with our OpenMPI
+Warning: Permanently added 'bhx0124,192.168.18.124' (ECDSA) to the list of known hosts.
+Warning: Permanently added 'bhx0125,192.168.18.125' (ECDSA) to the list of known hosts.
+bhx0123.bluehive.circ.private
+bhx0125.bluehive.circ.private
+bhx0124.bluehive.circ.private
+## methane test, 12 ranks on 3 nodes
+/home/wstoll/Claude/cp2k-2024.1.env: line 1: module: command not found
+grep: ch4.out: No such file or directory
+
+Node:       bhx0125
+Executable: /home/wstoll/Claude/cp2k-2024.1/exe/local/cp2k.psmp
+--------------------------------------------------------------------------
+8 total processes failed to start
