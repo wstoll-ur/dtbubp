@@ -32,6 +32,8 @@ case "$cmd" in
 run)
   # <node> may be a comma list (multi-node MPI run): the folder is copied to every node (no shared file
   # system; OpenMPI needs the working directory everywhere), the job starts on the first, results live there.
+  [ -f "${1:-}" ] || { echo "job script not found: ${1:-} (run the dtbubp --dry-run step first)"; exit 1; }
+  [ -n "${2:-}" ] || { echo "give a node"; exit 1; }
   script=$(realpath "$1"); nodes=$(echo $2 | tr ',' ' '); h=$(echo $nodes | awk '{print $1}'); task=${3:-0}
   shift 3 2>/dev/null || shift $#; envs="$*"     # optional VAR=value ... (e.g. DTB_LANES=1 DTB_RANKS=16)
   ldir=$(dirname "$script"); rdir=$(remote_of "$ldir"); name=$(basename "$script" .sh)

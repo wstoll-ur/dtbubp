@@ -10,7 +10,7 @@
 /Calculations/*
 !/Calculations/01_dft_benchmark/
 !/Calculations/02_dft_dataset/
-!/Calculations/02_dft_dataset_r1_pbe-d3bj_tzv2p/
+!/Calculations/02_dft_dataset_r*/
 !/Calculations/04_npt_ramp_78-300K/
 
 # inside the whitelisted calculation folders: only these
