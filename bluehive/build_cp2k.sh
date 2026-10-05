@@ -106,10 +106,10 @@ source $DEST/cp2k-2024.1.env; export OMP_NUM_THREADS=1
 echo "cp2k: \$(which cp2k.psmp)  mpirun: \$(which mpirun)"; ldd \$(which cp2k.psmp) | grep "not found"
 cd /home/$USER/dtbubp_test
 for i in 0 1 s; do rm -rf trun\$i; mkdir -p trun\$i && cp ch4.inp trun\$i/; done
-( cd trun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
-( cd trun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
+( cd trun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
+( cd trun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
 wait
-( cd truns && cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 )
+( cd truns && cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null )
 for i in 0 1 s; do echo "== trun\$i"; grep -E "CP2K\| version string|Data directory path|Total number of message passing|ENERGY\| Total|PROGRAM ENDED|ABORT|CP2K +1 " trun\$i/ch4.out; grep -A4 "STRESS| Analytical stress tensor" trun\$i/ch4.out | head -5; tail -3 trun\$i/run.log; done
 TEST
   cat $OUT
@@ -133,8 +133,8 @@ deploy)
 source $DEST/cp2k-2024.1.env; export OMP_NUM_THREADS=1
 cd /home/$USER/dtbubp_test
 for i in 0 1; do mkdir -p brun\$i && cp ch4.inp brun\$i/; done
-( cd brun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
-( cd brun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
+( cd brun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
+( cd brun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
 wait
 for i in 0 1; do echo "== brun\$i"; grep -E "ENERGY\| Total|PROGRAM ENDED|Analytical stress|ABORT|CP2K +1 " brun\$i/ch4.out; tail -4 brun\$i/run.log; done
 TEST

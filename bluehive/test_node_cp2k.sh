@@ -27,8 +27,8 @@ echo "## test: 2 concurrent 4-rank runs"
 cd $RD
 for i in 0 1; do mkdir -p run\$i; cp ch4.inp run\$i/; done
 export OMP_NUM_THREADS=1
-( cd run0 && mpirun -np 4 \$EXE -i ch4.inp -o ch4.out > run.log 2>&1 ) &
-( cd run1 && mpirun -np 4 \$EXE -i ch4.inp -o ch4.out > run.log 2>&1 ) &
+( cd run0 && mpirun -np 4 \$EXE -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
+( cd run1 && mpirun -np 4 \$EXE -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
 wait
 for i in 0 1; do echo "== run\$i"; grep -E "ENERGY\| Total|PROGRAM ENDED|STRESS\| Analytical|ABORT|CP2K +1 " run\$i/ch4.out; tail -5 run\$i/run.log; done
 REMOTE

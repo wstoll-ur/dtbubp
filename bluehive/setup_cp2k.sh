@@ -37,7 +37,7 @@ cd $T
 for i in 0 1; do
   mkdir -p run\$i && cp ch4.inp run\$i/
   ( cd run\$i && apptainer exec --cleanenv --env OMP_NUM_THREADS=1 $SIF \
-      mpirun -np 4 --bind-to core --cpu-set \$((4*i))-\$((4*i+3)) cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
+      mpirun -np 4 --bind-to core --cpu-set \$((4*i))-\$((4*i+3)) cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
 done
 wait
 for i in 0 1; do echo "== run\$i"; grep -E "ENERGY\| Total|PROGRAM ENDED|Analytical stress|ABORT" run\$i/ch4.out; tail -4 run\$i/run.log; done

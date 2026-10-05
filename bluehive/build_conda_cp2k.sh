@@ -30,8 +30,8 @@ ssh -o BatchMode=yes $H bash -s <<REMOTE
 export PATH=$ENV/bin:\$PATH OMP_NUM_THREADS=1
 cd /home/$USER/dtbubp_test
 for i in 0 1; do mkdir -p crun\$i && cp ch4.inp crun\$i/; done
-( cd crun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
-( cd crun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
+( cd crun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
+( cd crun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null ) &
 wait
 for i in 0 1; do echo "== crun\$i"; grep -E "ENERGY\| Total|PROGRAM ENDED|STRESS\| Analytical|ABORT|CP2K +1 " crun\$i/ch4.out; tail -6 crun\$i/run.log; done
 grep -m1 "CP2K| version" crun0/ch4.out; grep -m1 "Data directory" crun0/ch4.out
