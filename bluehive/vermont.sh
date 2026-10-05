@@ -7,6 +7,8 @@
 #   bash bluehive/vermont.sh watch [minutes]                         # pull every N min (default 30) until nothing runs
 #   bash bluehive/vermont.sh status                                  # running/finished + load per node
 #   bash bluehive/vermont.sh kill <tag>                              # stop a run (then pull)
+#   bash bluehive/vermont.sh stopall <node>[,node]                   # stop ALL our CP2K jobs on node(s), registered or not
+# run refuses to start on a node that already runs our cp2k.psmp (FORCE=1 to override).
 #
 # Job scripts are the ones dtbubp writes with --dry-run (plain bash; #SBATCH lines are comments).
 # On the node the repo root  <repo>  is replaced by  /home/$USER/dtbubp_runs  (node-local disk).
@@ -38,6 +40,13 @@ run)
   shift 3 2>/dev/null || shift $#; envs="$*"     # optional VAR=value ... (e.g. DTB_LANES=1 DTB_RANKS=16)
   ldir=$(dirname "$script"); rdir=$(remote_of "$ldir"); name=$(basename "$script" .sh)
   tag=${name}_${h}_t${task}_$(date +%m%d_%H%M%S)
+  # refuse to start a second CP2K job on a node that already runs ours (FORCE=1 overrides)
+  for n in $nodes; do
+    busy=$($SSH $n "pgrep -u $USER -c cp2k.psmp" < /dev/null)
+    if [ "${busy:-0}" -gt 0 ] && [ "${FORCE:-0}" != 1 ]; then
+      echo "$n already runs $busy cp2k.psmp processes of $USER -> not starting (stop them first: bash bluehive/vermont.sh stopall $n)"; exit 1
+    fi
+  done
   for n in $nodes; do
     $SSH $n "mkdir -p $rdir" || exit 1
     # inputs (and any finished outputs, so finished frames are skipped); job script with node-local paths.
@@ -91,5 +100,15 @@ kill)
   $SSH $h "pkill -TERM -g $pid; sleep 3; pkill -KILL -g $pid; true"
   pull_one $f; mv $f $f.killed; echo "stopped $1"
   ;;
-*) sed -n 2,14p "$0"; exit 1 ;;
+stopall)
+  # stop EVERY job of ours started by vermont.sh on the given node(s), registered or not (job scripts, mpirun, CP2K)
+  for h in $(echo $1 | tr ',' ' '); do
+    echo "== $h: before: $($SSH $h "pgrep -u $USER -c cp2k.psmp" < /dev/null) cp2k.psmp"
+    $SSH $h "pkill -u $USER -f '\.vermont\.sh'; pkill -u $USER -x mpirun; pkill -u $USER -x cp2k.psmp; sleep 3; \
+             pkill -9 -u $USER -x cp2k.psmp; true" < /dev/null
+    echo "   after: $($SSH $h "pgrep -u $USER -c cp2k.psmp" < /dev/null) cp2k.psmp"
+    for f in $REG/*.txt; do [ -f "$f" ] && read rh rest < $f && [ "$rh" = "$h" ] && mv $f $f.stopped; done
+  done
+  ;;
+*) sed -n 2,16p "$0"; exit 1 ;;
 esac
