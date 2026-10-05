@@ -282,6 +282,14 @@ def launch(dft: dict, ranks, extra: str = "", cpus: str | None = None) -> str:
         --cleanenv hides the Slurm variables, so the container's OpenMPI starts the ranks locally;
         `cpus` ("0-27") pins concurrent runs on one node to disjoint cores. cp2k_exe default "cp2k.psmp".
     """
+    if dft.get("launcher", "srun") == "mpirun" and dft.get("hosts"):
+        # several Vermont nodes, started over ssh by OpenMPI from the first one ("bhx0123:24,bhx0124:24,...").
+        # --prefix makes the remote orted find OpenMPI; same paths on every node; ranks filled node by node.
+        exe = dft.get("cp2k_exe", "cp2k.psmp")
+        pre = f"--prefix {dft['mpi_prefix']} " if dft.get("mpi_prefix") else ""
+        extra = dft.get("mpi_extra", "")
+        return " ".join(x for x in ("mpirun", pre.strip(), f"-np {ranks} --host {dft['hosts']}",
+                                    "--map-by core --bind-to core", extra, exe) if x)
     if dft.get("launcher", "srun") == "mpirun":   # no Slurm (BlueHive Vermont nodes): plain local mpirun
         exe = dft.get("cp2k_exe", "cp2k.psmp")
         pin = dft.get("mpi_pin", "--bind-to core --cpu-set {cpus}") if cpus else ""
