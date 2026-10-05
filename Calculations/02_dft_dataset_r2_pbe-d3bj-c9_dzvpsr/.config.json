@@ -1,5 +1,5 @@
 {
- "toml_sha256": "53bb9b7f4aee4a90231b28d8e875ed926f3fde9ce16dc499df5aeb095294483b",
+ "toml_sha256": "e8636defd849d0334d7b061f24a15f6c59cb66961b7e27b8336ef31fdb8ad249",
  "cfg": {
   "paths": {
    "code_dir": "../../code",
@@ -58,7 +58,7 @@
    "debug_field_au": 0.0005,
    "max_force_ev_a": 25.0,
    "cores_per_node": 24,
-   "frames_per_node": 2,
+   "frames_per_node": 1,
    "mem_per_node_gb": 60,
    "frame_timeout_min": 120,
    "chunks": 3,

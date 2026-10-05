@@ -61,12 +61,13 @@ xc_smoothing  = true          # XC_DERIV NN10_SMOOTH + XC_SMOOTH_RHO NN10, as 9M
 debug_field_au = 0.0005       # smoke test: finite field for the polarizability check (a.u.)
 max_force_ev_a = 25.0         # drop a labelled frame above this (broken structure)
 # packing on the BlueHive Vermont nodes bhx0123-0125 (outside Slurm, no shared file system; bluehive/vermont.sh):
-# 24 Broadwell cores and 62 GB each -> 2 frames at once, 12 MPI ranks each, pinned. One chunk per node.
+# 24 Broadwell cores and 62 GB each -> 1 frame at a time on 24 ranks (DTB_LANES/DTB_RANKS override). One chunk per node.
 # bhx0123 is partly occupied by another user's job (~7 cores): launch it with DTB_LANES=1 DTB_RANKS=16.
 # Cost: level 12 step 0 (atomic guess, E+F+stress) took 337 s on 24 ranks of bhx0124; per frame on 12 ranks with a
 # restarted wavefunction maybe ~5-10 min -> the smoke test gives the real number.
 cores_per_node    = 24
-frames_per_node   = 2
+frames_per_node   = 1         # 1 frame x 24 ranks (smoke test: 2 lanes x 12 ranks gave 12.6 min per frame per lane, while
+                              # level 12 ran ~5 s per SCF iteration on 24 ranks); compare frames/hour after the first hour
 mem_per_node_gb   = 60        # not enforced outside Slurm
 frame_timeout_min = 120
 chunks            = 3         # one chunk per node: bhx0123, bhx0124, bhx0125
