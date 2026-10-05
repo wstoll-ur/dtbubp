@@ -1,0 +1,11 @@
+# cp2k container test on bhx0123.bluehive.circ.private 2026-10-05T11:32:10-0400
+ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'apptainer/1.4.1'
+bash: line 3: cd: /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp/bluehive/cp2k_test: No such file or directory
+cp: cannot stat ‘ch4.inp’: No such file or directory
+cp: cannot stat ‘ch4.inp’: No such file or directory
+== run0
+grep: run0/ch4.out: No such file or directory
+bash: line 6: apptainer: command not found
+== run1
+grep: run1/ch4.out: No such file or directory
+bash: line 6: apptainer: command not found

@@ -1,0 +1,13 @@
+# setup_cp2k 2026-10-05T11:31:46-04:00 on bluehive3
+INFO:    Converting OCI blobs to SIF format
+INFO:    Starting build...
+INFO:    Fetching OCI image...
+INFO:    Extracting OCI image...
+FATAL:   While making image from oci registry: error fetching image to cache: while building SIF from layers: packer failed to pack: while unpacking rootfs: while unpacking layer sha256:a486411936734b0d1d201c8a0ed8e9d449a64d5033fdc33411ec95bc26460efb: unpack entry: bin: restore parent directory: restore xattr metadata: /scratch/wstoll/tmp/build-temp-3964948285/rootfs: unpriv.lsetxattr: invalid argument
+ls: cannot access '/scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif': No such file or directory
+## version
+FATAL:   While checking container encryption: could not open image /scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: failed to retrieve path for /scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: lstat /gpfs/fs2/scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: no such file or directory
+## mpirun
+FATAL:   While checking container encryption: could not open image /scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: failed to retrieve path for /scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: lstat /gpfs/fs2/scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: no such file or directory
+## data dir
+FATAL:   While checking container encryption: could not open image /scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: failed to retrieve path for /scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: lstat /gpfs/fs2/scratch/wstoll/containers/cp2k_2024.1_openmpi_generic_psmp.sif: no such file or directory
