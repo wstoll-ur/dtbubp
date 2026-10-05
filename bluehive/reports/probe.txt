@@ -1,0 +1,161 @@
+# probe 2026-10-05T11:06:58-04:00 on bluehive3 as wstoll
+
+## OS / CPU
+Linux bluehive3 5.14.0-427.13.1.el9_4.x86_64 #1 SMP PREEMPT_DYNAMIC Wed Apr 10 10:29:16 EDT 2024 x86_64 x86_64 x86_64 GNU/Linux
+CPU(s):                             64
+Model name:                         Intel(R) Xeon(R) Gold 6448Y
+Thread(s) per core:                 1
+Core(s) per socket:                 32
+Socket(s):                          2
+CPU(s) scaling MHz:                 98%
+NUMA node(s):                       2
+               total        used        free      shared  buff/cache   available
+Mem:            1006          38         950           4          27         968
+
+## Slurm partitions (partition avail timelimit nodes cpus mem gres state)
+acmml2 up 15-00:00:00 1 128 1031142 gpu:A40:3 alloc
+acmml3 up 15-00:00:00 1 128 1031051 gpu:L40S:2 mix
+acmml3 up 15-00:00:00 1 64 772012 gpu:L40S:4 mix
+acmml up 15-00:00:00 1 48 191377 (null) idle
+acmml up 15-00:00:00 1 48 191377 (null) mix
+antz up 10-00:00:00 1 96 1031060 (null) mix
+atmos2 up 30-00:00:00 1 36 118299 (null) alloc
+atmos2 up 30-00:00:00 15 36 112171+ (null) idle
+atmos up 30-00:00:00 14 64 504972 (null) idle
+atmos up 30-00:00:00 2 64 504972 (null) mix
+awhite up 30-00:00:00 1 48 505071 gpu:A100:4 idle
+awhite up 30-00:00:00 3 36 380053 (null) idle
+beta up 10-00:00:00 1 128 2063243 (null) mix
+blizzard up 14-00:00:00 2 96 504964 (null) idle
+booster up 7-00:00:00 2 56+ 504786+ (null) idle
+charlesworths up 30-00:00:00 1 192 504977 (null) idle
+circ_test up 60-00:00:00 1 48 374884 (null) idle
+circ_test up 60-00:00:00 1 56 514786 gpu:A100:4 down*
+coe up 5-00:00:00 2 72 1031066 gpu:H100:4 mix
+doppelbock up 5-00:00:00 1 64 1031007 gpu:A40:4 mix
+ds4ai up 5-00:00:00 2 64 504972 gpu:L40S:4 alloc
+ece up 5-00:00:00 1 56 504974 (null) idle
+elpis up 5-00:00:00 1 96 504964 (null) idle
+factslab up 10-00:00:00 1 48 256928 gpu:A40:4 mix
+femto up 30-00:00:00 11 56+ 250000+ (null) mix
+femto up 30-00:00:00 1 56 250000 (null) idle
+glymph up 5-00:00:00 1 16 256876 gpu:A40:4 idle
+glymph up 5-00:00:00 1 40 180000 (null) idle
+glymph up 5-00:00:00 1 52 180000 gpu:V100S:2(S:0-1) idle
+gpu up 5-00:00:00 1 32 386125 gpu:A100:4 alloc
+gpu up 5-00:00:00 2 32+ 191517+ gpu:V100:4 resv
+gpu up 5-00:00:00 2 56 504786+ gpu:A100:4 resv
+gpu up 5-00:00:00 3 56 504786+ gpu:A100:4 mix
+grc_mem up 14-00:00:00 1 56 504787 (null) idle
+grc up 14-00:00:00 11 64 500000+ (null) idle
+grc up 14-00:00:00 1 64 504785 (null) alloc
+grc up 14-00:00:00 8 64 500000+ (null) mix
+grossfield up 30-00:00:00 1 24 180000 gpu:T4:12 idle
+h100 up 5-00:00:00 5 72 504969 gpu:H100:4 mix
+helab up 10-00:00:00 1 64 772012 gpu:L40S:4 mix
+interactive up 12:00:00 1 96 504964 (null) mix
+ising up 30-00:00:00 1 32 515031 gpu:L40S:2 mix
+ising up 30-00:00:00 13 48+ 374913+ (null) idle
+ising up 30-00:00:00 2 64 504972 gpu:L40S:4 alloc
+jarvis up 30-00:00:00 1 64 504783 gpu:A40:3 mix
+kuelap up 10-00:00:00 1 48 256916 gpu:L40S:4 mix
+luna up 30-00:00:00 4 40 180000+ (null) idle
+luna up 30-00:00:00 7 40 180000+ (null) mix
+luna up 30-00:00:00 8 40 180003+ (null) alloc
+marcy up 5-00:00:00 1 24 180000 gpu:T4:12 idle
+marcy up 5-00:00:00 1 24 180000 gpu:T4:12 mix
+mlstat up 5-00:00:00 1 96 504964 (null) idle
+mmm up 60-00:00:00 1 56 504786 gpu:A100:4 down*
+mollab up 5-00:00:00 1 56 504785 gpu:A100:4 mix
+motion up 5-00:00:00 1 128 246856 (null) idle
+ocean up 5-00:00:00 3 36 118296+ (null) idle
+ondes up 5-00:00:00 1 64 504783 gpu:A40:1 idle
+opt up 10-00:00:00 1 64 1031068 gpu:L40S:2 mix
+PARTITION AVAIL TIMELIMIT NODES CPUS MEMORY GRES STATE
+p_keanebp up 30-00:00:00 1 48 374883 (null) idle
+
+## My associations (account partition qos)
+mruggie8_lab||fastx,gpu,h100,interactive,preempt,reserved,standard,teraeth|
+
+## Free/idle nodes per partition
+PARTITION NODES CPUS MEMORY NODELIST
+h100 0 0 0 
+standard* 12 56+ 504771+ bhd[0090,0092-0093,0095,0100,0102,0104],bhdrb6x[0169-0172],bhdrb8x0156
+interactive 0 0 0 
+gpu 4 32+ 191517+ bhg[0042-0043,0052,0057]
+preempt 31 16+ 118299+ bhd[0020,0079,0081,0087-0088,0105,0137-0138,0143-0144,0146,0148-0149],bhdrb5x[0176,0179,0181,0184-0191],bhdrb6x0214,bhdrb8x0161,bhg[0045,0048-0049,0063-0064]
+ros2 1 56 504789 bhd0098
+coe 0 0 0 
+factslab 0 0 0 
+skylight 0 0 0 
+ising 13 48+ 374913+ bhd[0087-0088,0118-0123,0139-0141,0143-0144]
+ur2nlp 0 0 0 
+ds4ai 0 0 0 
+mlstat 1 96 504964 bhdrb6x0212
+atmos 14 64 504972 bhdrb5x[0176,0179-0191]
+atmos2 15 36 112171+ bhd[0022-0036]
+antz 0 0 0 
+kuelap 0 0 0 
+femto 1 56 250000 bhd0112
+polariton 3 48 256928+ bhd[0148-0150]
+
+## My jobs
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+ 2042826_[73-99%2]   teraeth cpks_sc-   wstoll PD       0:00      1 (JobArrayTaskLimit)
+2049042_[55-100%2]   teraeth cpksfc_s   wstoll PD       0:00      1 (JobArrayTaskLimit)
+        2042826_72   teraeth cpks_sc-   wstoll  R      31:13      1 bhd0127
+        2042826_71   teraeth cpks_sc-   wstoll  R      48:54      1 bhd0134
+        2049042_54   teraeth cpksfc_s   wstoll  R    2:40:22      1 bhd0126
+        2049042_53   teraeth cpksfc_s   wstoll  R    3:02:34      1 bhd0132
+
+## Storage
+HOME=/home/wstoll  PWD=/gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp
+Filesystem      Size  Used Avail Use% Mounted on
+fs1             201T   74T  127T  37% /gpfs/fs1
+fs2             4.2P  3.8P  477T  89% /gpfs/fs2
+Unknown option: s
+usage: /sfw/rhel9-x86_64/circ/bin/circ-quota
+prints quota info for user running the script
+
+-or-   /sfw/rhel9-x86_64/circ/bin/circ-quota <uid1> <uid2> ...
+prints quota info for each uid/login given
+
+options:
+-h, --help      print this message
+-d, --dir=<dir> directory containing quota messages.  default: /software/circ/share/quota-rep
+
+## CP2K modules
+gromacs/2026.3-cp2k-2025.2
+
+## each CP2K module: executables, version, data files
+
+## other ways to get CP2K
+conda -> /software/miniconda3/4.12.0/condabin/conda
+mamba -> /software/miniconda3/4.12.0/condabin/mamba
+apptainer/1.3.0-1
+apptainer/1.4.1
+gcc/14.2.0
+impi/2024.1
+intel/2024.1
+intel/2025.0
+miniforge3/25.3.0-3
+miniforge3/25.11.0-1
+miniforge3/26.1.1
+openmpi/5.0.5/b1
+openmpi/5.0.5/b2
+openmpi/5.0.11/b2
+python3/3.9.18
+python3/3.11.0
+python3/3.14.2
+
+## python for dtbubp (needs numpy; TOML via python>=3.11 or tomli)
+python3 -> /home/wstoll/.conda/envs/tera/bin/python3: 3.10.18 numpy=2.2.6
+python -> /home/wstoll/.conda/envs/tera/bin/python: 3.10.18 numpy=2.2.6
+
+## srun MPI plugins
+MPI plugin types are...
+	none
+	cray_shasta
+	pmix
+	pmi2
+specific pmix plugin versions available: pmix_v5
