@@ -50,3 +50,4 @@ __pycache__/
 /bluehive/cp2k_test/run*/
 /bluehive/cp2k_test/*.log
 /bluehive/cp2k_test/test_job.sh
+/bluehive/vermont_runs/
