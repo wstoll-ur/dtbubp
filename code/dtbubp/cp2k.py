@@ -267,9 +267,23 @@ def cp2k_stress_to_ase(stress, unit) -> np.ndarray:
 
 
 # ============================================================================ launching
-def launch(dft: dict, ranks, extra: str = "") -> str:
-    """MPI launch line for one CP2K run. Cluster-specific bits come from [dft]:
-    cp2k_exe (default cp2k.popt) and mpi_flags (default "--mpi=pmi2 --cpu-bind=cores", as on Leonardo)."""
+def launch(dft: dict, ranks, extra: str = "", cpus: str | None = None) -> str:
+    """MPI launch line for one CP2K run (followed by `-i input -o output` by the caller). From [dft]:
+
+    launcher = "srun" (default; Leonardo, CP2K module):
+        srun <extra> --ntasks=R --cpus-per-task=1 <mpi_flags> <cp2k_exe>
+        mpi_flags default "--mpi=pmi2 --cpu-bind=cores", cp2k_exe default "cp2k.popt"
+    launcher = "apptainer" (BlueHive: official CP2K container, single node per run):
+        apptainer exec --cleanenv --env OMP_NUM_THREADS=1 <container> mpirun -np R --bind-to core
+                       [--cpu-set <cpus>] <cp2k_exe>
+        --cleanenv hides the Slurm variables, so the container's OpenMPI starts the ranks locally;
+        `cpus` ("0-27") pins concurrent runs on one node to disjoint cores. cp2k_exe default "cp2k.psmp".
+    """
+    if dft.get("launcher", "srun") == "apptainer":
+        exe = dft.get("cp2k_exe", "cp2k.psmp")
+        cs = f"--cpu-set {cpus} " if cpus else ""
+        return (f"apptainer exec --cleanenv --env OMP_NUM_THREADS=1 {dft['container']} "
+                f"mpirun -np {ranks} --bind-to core {cs}{exe}")
     exe = dft.get("cp2k_exe", "cp2k.popt")
     flags = dft.get("mpi_flags", "--mpi=pmi2 --cpu-bind=cores")
     return " ".join(x for x in ("srun", extra, f"--ntasks={ranks} --cpus-per-task=1", flags, exe) if x)

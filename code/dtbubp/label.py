@@ -31,12 +31,36 @@ def _env(c: Campaign) -> str:
 
 
 def _pool_body(c: Campaign, workdir: Path, list_file: str) -> str:
-    """Run the frames listed in `list_file` K at a time on one node (srun --exact steps)."""
+    """Run the frames listed in `list_file` K at a time on one node.
+
+    srun launcher (Leonardo): a queue feeding `srun --exact` job steps.
+    apptainer launcher (BlueHive): K lanes, lane i pinned to cores [i*R, (i+1)*R), each running its share
+    of the list one frame after the other (concurrent mpiruns must not share cores).
+    """
     d = c.cfg["dft"]
     k = int(d["frames_per_node"])
     ranks = int(d["cores_per_node"]) // k
     mem = int(d["mem_per_node_gb"]) // k
     tmo = int(d["frame_timeout_min"])
+    if d.get("launcher", "srun") == "apptainer":
+        return _env(c) + f"""
+export OMP_NUM_THREADS=1
+cd {workdir}
+echo "node $(hostname), $(nproc) cores, {k} lanes x {ranks} ranks, started $(date)"
+lane() {{
+  local i=$1 lo=$(( $1 * {ranks} )) hi=$(( $1 * {ranks} + {ranks} - 1 )) n=0 f
+  for f in $(cat {list_file}); do
+    n=$((n + 1)); [ $(( (n - 1) % {k} )) -eq $i ] || continue
+    grep -q "PROGRAM ENDED" $f/output.out 2>/dev/null && continue
+    ( cd $f && timeout {tmo}m {cp2k.launch(d, ranks, cpus="$lo-$hi")} \\
+          -i input.inp -o output.out > run.log 2>&1 \\
+      || echo "$f: CP2K failed or timed out (see $f/output.out, $f/run.log)" )
+  done
+}}
+for i in $(seq 0 {k - 1}); do lane $i & sleep 2; done
+wait
+echo "all frames of {list_file} attempted $(date)"
+"""
     return _env(c) + f"""
 export OMP_NUM_THREADS=1
 cd {workdir}

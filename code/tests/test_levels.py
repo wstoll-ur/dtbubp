@@ -31,3 +31,17 @@ def test_launch_and_optional_account(tmp_path):
     s = write_script({"partition": "standard", "account": "", "extra": ["--nodes=1"]}, tmp_path / "j.sh", "x",
                      "echo", "01:00:00", tmp_path).read_text()
     assert "--partition=standard" in s and "--account" not in s and "--qos" not in s
+
+
+def test_apptainer_launcher_and_lanes(tmp_path):
+    d = {"launcher": "apptainer", "container": "/scratch/x/cp2k.sif"}
+    l = cp2k.launch(d, 28, cpus="28-55")
+    assert l == ("apptainer exec --cleanenv --env OMP_NUM_THREADS=1 /scratch/x/cp2k.sif "
+                 "mpirun -np 28 --bind-to core --cpu-set 28-55 cp2k.psmp")
+    from dtbubp.label import _pool_body
+
+    class C:
+        cfg = {"dft": dict(d, frames_per_node=2, cores_per_node=56, mem_per_node_gb=400, frame_timeout_min=60),
+               "env": {"dft": "module load apptainer"}}
+    b = _pool_body(C(), tmp_path, "chunk_0.txt")
+    assert "--cpu-set $lo-$hi" in b and "lo=$(( $1 * 28 ))" in b and "seq 0 1" in b and "srun" not in b

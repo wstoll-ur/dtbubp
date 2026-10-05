@@ -47,3 +47,6 @@ __pycache__/
 /Calculations/**/runs_*.txt
 # bench runs: Leonardo results stay in Box (summary in PROJECT_LOG); BlueHive's go to bluehive/reports/
 /Calculations/01_dft_benchmark/cellopt/
+/bluehive/cp2k_test/run*/
+/bluehive/cp2k_test/*.log
+/bluehive/cp2k_test/test_job.sh

@@ -93,7 +93,7 @@ if [ -s bench-1.restart ]; then                  # continuation of a run killed 
   INP=restart.inp
   echo "continuing from bench-1.restart"
 fi
-{cp2k.launch(dft, ranks)} -i $INP -o output.out > srun.log 2>&1
+{cp2k.launch(dft, ranks, cpus=f"0-{ranks - 1}")} -i $INP -o output.out > srun.log 2>&1
 echo "exit $? at $(date)"
 grep -E "OPTIMIZATION COMPLETED|MAXIMUM NUMBER OF OPTIMIZATION STEPS|ABORT" output.out | head -3
 """
