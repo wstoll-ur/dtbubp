@@ -1,0 +1,29 @@
+# CP2K test on bhx0124.bluehive.circ.private 2026-10-05T15:31:45-0400
+cp2k: /home/wstoll/Claude/cp2k-2024.1/exe/local/cp2k.psmp
+mpirun: /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5/bin/mpirun
+== trun0
+ * [ABORT]                                                                     *
+ CP2K| version string:                                       CP2K version 2024.1
+ CP2K| Data directory path                  /home/wstoll/Claude/cp2k-2024.1/data
+ GLOBAL| Total number of message passing processes                             4
+ * [ABORT]                                                                     *
+[bhx0124.bluehive.circ.private:20858] PMIX ERROR: UNREACHABLE in file server/pmix_server.c at line 2198
+[bhx0124.bluehive.circ.private:20858] 3 more processes have sent help message help-mpi-api.txt / mpi-abort
+[bhx0124.bluehive.circ.private:20858] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
+== trun1
+ * [ABORT]                                                                     *
+ CP2K| version string:                                       CP2K version 2024.1
+ CP2K| Data directory path                  /home/wstoll/Claude/cp2k-2024.1/data
+ GLOBAL| Total number of message passing processes                             4
+ * [ABORT]                                                                     *
+[bhx0124.bluehive.circ.private:20859] PMIX ERROR: UNREACHABLE in file server/pmix_server.c at line 2198
+[bhx0124.bluehive.circ.private:20859] 3 more processes have sent help message help-mpi-api.txt / mpi-abort
+[bhx0124.bluehive.circ.private:20859] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
+== truns
+ CP2K| version string:                                       CP2K version 2024.1
+ CP2K| Data directory path                  /home/wstoll/Claude/cp2k-2024.1/data
+ GLOBAL| Total number of message passing processes                             1
+ * [ABORT]                                                                     *
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
