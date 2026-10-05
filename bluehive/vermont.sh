@@ -65,7 +65,10 @@ run)
       | $SSH $n "cat > $rdir/$name.vermont.sh"
   done
   log=$rdir/${name}_vermont_t$task.log
-  pid=$($SSH $h "cd $rdir && SLURM_ARRAY_TASK_ID=$task SLURM_JOB_ID=$tag $envs setsid nohup bash -l $name.vermont.sh > $log 2>&1 < /dev/null & echo \$!")
+  # NB: 'cd X && cmd &' would background the whole list in a subshell that keeps ssh's stdout open, so ssh
+  # (and this script) hangs until the job ends. cd first, then background only the fully redirected command.
+  pid=$($SSH $h "cd $rdir || exit 1; SLURM_ARRAY_TASK_ID=$task SLURM_JOB_ID=$tag $envs setsid nohup bash -l $name.vermont.sh > $log 2>&1 < /dev/null & echo \$!" < /dev/null)
+  [ -n "$pid" ] || { echo "start on $h failed"; exit 1; }
   echo "$h $pid $name task=$task $ldir $rdir" > $REG/$tag.txt
   echo "started $tag: $h pid $pid, node dir $rdir, log $log"
   ;;
