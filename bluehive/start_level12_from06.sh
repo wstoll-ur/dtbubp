@@ -227,8 +227,13 @@ cat > "$LEVEL/level.json" <<'DTB_FROM06_PAYLOAD'
 DTB_FROM06_PAYLOAD
 cat > "$RUN/bench_from06_job.sh" <<'DTB_FROM06_PAYLOAD'
 #!/bin/bash
-set -euo pipefail
+# CP2K toolchain setup references unset variables; the node module function can
+# also return nonzero for harmless warnings. Enable strict checks after setup.
+set +eu
 source "$HOME/Claude/cp2k-2024.1.env"
+set -euo pipefail
+command -v mpirun >/dev/null
+command -v cp2k.psmp >/dev/null
 export OMP_NUM_THREADS=1
 cd "$(dirname "$0")/12_pbe_d3bj_c9_dzvpsr"
 mpirun --prefix /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5 -np 24 --host bhx0124:24 --map-by core --bind-to core -x PATH -x LD_LIBRARY_PATH -x OMP_NUM_THREADS --mca btl_tcp_if_include 192.168.18.0/24 --mca oob_tcp_if_include 192.168.18.0/24 cp2k.psmp -i input.inp -o output.out > srun.log 2>&1

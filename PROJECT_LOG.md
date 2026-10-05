@@ -770,6 +770,12 @@ Reuse from 9MA: `npt_al.py` (driver pattern, CP2K parsers, stress conversion, Sl
 - Synced the separate GitHub checkout first and verified its log matched the Box copy. Updated both copies and committed/pushed the handoff rule.
 - Current handoff: `bluehive/start_level12_from06.sh` was pushed in commit `2e53416`; it prepares a fresh level-12 run from level 06 saved step 154 and launches on bhx0124. Will has the stop/relaunch commands. No confirmation yet that the replacement run was launched; the previous level-12 job's live status has not been checked by Codex.
 
+### 2026-10-05 — Fix level-12 warm-start environment loading (Will reported; Codex)
+- Will ran the warm-start launcher; input files were created, but no calculation started. `bench_from06_job_vermont_t0.log` reported `tools/toolchain/install/setup: line 28: CP_DFLAGS: unbound variable`.
+- Cause: the generated job enabled `set -u` before sourcing CP2K's environment. Fixed the launcher to disable unset-variable and immediate-exit checking during environment loading, matching the existing build script's handling of harmless module warnings, then enable strict checks and verify `mpirun` and `cp2k.psmp` are available.
+- Verified the generated job against a simulated environment referencing unset CP_DFLAGS and returning a harmless intermediate nonzero status; launcher proceeded to a mock MPI command. Shell syntax passed. No actual CP2K run started by Codex.
+- Next: Will pulls the fix and runs `bash bluehive/start_level12_from06.sh run` from the BlueHive checkout. The previous attempt is confirmed not running; no kill is needed for that failed attempt. This creates a fresh timestamped warm-start run on bhx0124.
+
 ## 10. References
 
 - [CP2K-POLAR] CP2K manual, FORCE_EVAL/PROPERTIES/LINRES/POLAR (`DO_RAMAN`, `PERIODIC_DIPOLE_OPERATOR` = Berry phase) — https://manual.cp2k.org/trunk/CP2K_INPUT/FORCE_EVAL/PROPERTIES/LINRES/POLAR.html
