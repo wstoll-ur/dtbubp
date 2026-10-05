@@ -1,4 +1,4 @@
-# multinode check 2026-10-05T15:33:27-04:00; first node bhx0123; nodes bhx0123 bhx0124 bhx0125
+# multinode check 2026-10-05T15:37:43-04:00; first node bhx0123; nodes bhx0123 bhx0124 bhx0125
 ## bhx0123: interfaces / InfiniBand
 no_IB
 eno1 speed 10000 Mb/s
@@ -15,20 +15,22 @@ eno1 speed 10000 Mb/s
 eno1.23 speed 10000 Mb/s
 eno2 speed  Mb/s
 ## ssh from bhx0123 to the others (must print hostnames without asking for a password)
-command-line line 0: unsupported option "accept-new".
-command-line line 0: unsupported option "accept-new".
-command-line line 0: unsupported option "accept-new".
+Warning: Permanently added 'bhx0123,192.168.18.123' (ECDSA) to the list of known hosts.
+bhx0123.bluehive.circ.private
+bhx0124.bluehive.circ.private
+bhx0125.bluehive.circ.private
 ## 3-node hostname with our OpenMPI
-Warning: Permanently added 'bhx0124,192.168.18.124' (ECDSA) to the list of known hosts.
-Warning: Permanently added 'bhx0125,192.168.18.125' (ECDSA) to the list of known hosts.
 bhx0123.bluehive.circ.private
 bhx0125.bluehive.circ.private
 bhx0124.bluehive.circ.private
 ## methane test, 12 ranks on 3 nodes
-/home/wstoll/Claude/cp2k-2024.1.env: line 1: module: command not found
-grep: ch4.out: No such file or directory
 
-Node:       bhx0125
-Executable: /home/wstoll/Claude/cp2k-2024.1/exe/local/cp2k.psmp
---------------------------------------------------------------------------
-8 total processes failed to start
+real	1m39.940s
+user	1m46.186s
+sys	3m10.557s
+ GLOBAL| Total number of message passing processes                            12
+[bhx0123.bluehive.circ.private:03003] PMIX ERROR: UNREACHABLE in file server/pmix_server.c at line 2198
+[bhx0123.bluehive.circ.private:03003] PMIX ERROR: UNREACHABLE in file server/pmix_server.c at line 2198
+[bhx0123.bluehive.circ.private:03003] PMIX ERROR: UNREACHABLE in file server/pmix_server.c at line 2198
+[bhx0123.bluehive.circ.private:03003] 11 more processes have sent help message help-mpi-api.txt / mpi-abort
+[bhx0123.bluehive.circ.private:03003] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
