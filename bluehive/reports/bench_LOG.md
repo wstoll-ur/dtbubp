@@ -1,0 +1,8 @@
+- `2026-10-05 15:46:24` **level-of-theory benchmark submitted** (CELL_OPT, one node per level)
+    - job: DRY
+    - levels: ['12_pbe_d3bj_c9_dzvpsr']
+    - dir: /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp/Calculations/01_dft_benchmark/cellopt
+- `2026-10-05 16:14:23` **level-of-theory benchmark submitted** (CELL_OPT, one node per level)
+    - job: DRY
+    - levels: ['12_pbe_d3bj_c9_dzvpsr']
+    - dir: /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp/Calculations/01_dft_benchmark/cellopt

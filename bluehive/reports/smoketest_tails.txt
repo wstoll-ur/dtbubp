@@ -1,0 +1,77 @@
+== Calculations/02_dft_dataset_r2_pbe-d3bj-c9_dzvpsr/smoketest/label/output.out
+  **** **** ******  **  PROGRAM STARTED AT               2026-10-05 17:11:26.620
+ ***** ** ***  *** **   PROGRAM STARTED ON         bhx0125.bluehive.circ.private
+ **    ****   ******    PROGRAM STARTED BY                                wstoll
+  **** **  *******  **  PROGRAM STARTED IN /local_scratch/home/wstoll/dtbubp_run
+  *** SCF run converged in    21 steps ***
+ CP2K                                 1  1.0    0.010    0.014  754.108  754.114
+  **** **** ******  **  PROGRAM ENDED AT                 2026-10-05 17:24:01.204
+ ot_scf_mini                         71  8.0    0.001    0.001   54.715   54.848
+ transfer_rs2pw                     362  9.0    0.004    0.005   41.399   54.120
+ mp_sendrecv_dv                    3982 11.0   39.595   52.270   39.595   52.270
+ transfer_rs2pw_300                  74 10.0    1.535    1.627   35.145   47.843
+ ot_mini                             71  9.0    0.000    0.000   37.215   37.296
+ qs_ot_get_derivative                71 10.0    0.001    0.001   33.566   33.650
+ pw_transfer                       1009 10.2    0.049    0.053   23.963   24.581
+ fft_wrap_pw1pw2                    865 11.2    0.008    0.009   23.528   24.160
+ qs_vxc_create                       72  9.0    0.001    0.002   23.850   24.102
+ xc_vxc_pw_create                    72 10.0    0.223    0.250   23.848   24.101
+ qs_energies_init_hamiltonians        1  4.0    0.000    0.000   23.719   23.720
+ calculate_dispersion_pairpot         1  5.0   18.647   22.858   22.859   22.859
+ qs_ot_get_derivative_diag           49 11.0    0.002    0.015   21.243   21.331
+ potential_pw2rs                     72 11.0    0.009    0.009   19.805   19.889
+ fft3d_ps                           865 13.2    7.537    8.319   18.363   19.158
+ mp_waitall_1                     75934 15.3   17.445   18.887   17.445   18.887
+ fft_wrap_pw1pw2_300                289 11.7    1.937    2.045   17.014   17.604
+ xc_rho_set_and_dset_create          72 11.0    0.248    0.272   15.472   16.039
+ -------------------------------------------------------------------------------
+
+ The number of warnings for this run is : 1
+ 
+ -------------------------------------------------------------------------------
+  **** **** ******  **  PROGRAM ENDED AT                 2026-10-05 17:24:01.204
+ ***** ** ***  *** **   PROGRAM RAN ON             bhx0125.bluehive.circ.private
+ **    ****   ******    PROGRAM RAN BY                                    wstoll
+ ***** **    ** ** **   PROGRAM PROCESS ID                                 28528
+  **** **  *******  **  PROGRAM STOPPED IN /local_scratch/home/wstoll/dtbubp_run
+                                           s/Calculations/02_dft_dataset_r2_pbe-
+                                           d3bj-c9_dzvpsr/smoketest/label
+== Calculations/02_dft_dataset_r2_pbe-d3bj-c9_dzvpsr/smoketest/stress_numerical/output.out
+  *** SCF run converged in    14 steps ***
+  *** SCF run converged in    15 steps ***
+  *** SCF run converged in    15 steps ***
+  *** SCF run converged in    14 steps ***
+  *** SCF run converged in    12 steps ***
+  *** SCF run converged in    13 steps ***
+ CP2K                                 1  1.0    0.025    0.029 2964.780 2964.813
+  **** **** ******  **  PROGRAM ENDED AT                 2026-10-05 18:00:54.025
+ dbcsr_multiply_generic            5205 10.1    0.199    0.202  100.267  175.457
+ qs_energies_init_hamiltonians       20  3.0    0.000    0.001  169.824  169.827
+ transfer_rs2pw                    1770  8.2    0.025    0.028   99.960  168.711
+ mp_sum_l                         25080 11.0   91.418  166.406   91.418  166.406
+ transfer_rs2pw_300                 386  9.1    9.212    9.571   97.566  166.266
+ mp_sendrecv_dv                   19470 10.2   89.265  158.132   89.265  158.132
+ calculate_dispersion_pairpot        20  4.0  121.408  151.901  152.312  152.314
+ init_scf_loop                       21  4.1    0.000    0.000   90.501   90.502
+ pw_transfer                       4864  9.4    0.235    0.246   81.583   84.078
+ fft_wrap_pw1pw2                   4172 10.4    0.040    0.041   79.294   81.805
+ qs_vxc_create                      346  8.1    0.006    0.007   79.764   80.762
+ xc_vxc_pw_create                   346  9.1    1.148    1.239   79.757   80.755
+ fft_wrap_pw1pw2_300               1404 10.9   10.426   10.853   73.038   75.770
+ init_scf_run                        20  3.0    0.000    0.001   75.485   75.487
+ scf_env_initial_rho_setup           20  4.0    0.000    0.001   75.485   75.486
+ wfi_extrapolate                     20  5.0    0.001    0.003   71.699   71.700
+ xc_rho_set_and_dset_create         346 10.1    1.532    1.684   64.459   66.505
+ -------------------------------------------------------------------------------
+
+ The number of warnings for this run is : 1
+ 
+ -------------------------------------------------------------------------------
+  **** **** ******  **  PROGRAM ENDED AT                 2026-10-05 18:00:54.025
+ ***** ** ***  *** **   PROGRAM RAN ON             bhx0125.bluehive.circ.private
+ **    ****   ******    PROGRAM RAN BY                                    wstoll
+ ***** **    ** ** **   PROGRAM PROCESS ID                                 28577
+  **** **  *******  **  PROGRAM STOPPED IN /local_scratch/home/wstoll/dtbubp_run
+                                           s/Calculations/02_dft_dataset_r2_pbe-
+                                           d3bj-c9_dzvpsr/smoketest/stress_numer
+                                           ical

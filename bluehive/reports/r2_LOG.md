@@ -1,0 +1,19 @@
+- `2026-10-05 17:09:54` **smoke test submitted**: label / numerical stress / debug polarizability on one frame
+    - frame: f0000
+    - T_target: 299.9
+    - job: DRY
+    - dir: /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp/Calculations/02_dft_dataset_r2_pbe-d3bj-c9_dzvpsr/smoketest
+- `2026-10-05 18:01:26` **smoke test check**
+    - label_ended: True
+    - has_energy: True
+    - has_forces: True
+    - has_stress: True
+    - has_dipole_debye: True
+    - label_walltime_min: 12.6
+    - stress_max_abs_diff_GPa: 0.0017
+    - pressure_analytical_GPa: 1.1091
+    - pressure_numerical_GPa: 1.1104
+    - polar_debug: skipped (polarizability = false)
+    - dipole_folded_eA: [-0.0139, -0.015, 0.1553]
+    - dipole_over_half_quantum: 0.038
+    - verdict: PASS: submit the labelling (`dtb label`)

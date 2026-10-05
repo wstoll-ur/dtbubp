@@ -1,0 +1,7 @@
+             JOBID PARTITION     NAME     USER ST       TIME  NODES NODELIST(REASON)
+ 2042826_[76-99%2]   teraeth cpks_sc-   wstoll PD       0:00      1 (JobArrayTaskLimit)
+2049042_[62-100%2]   teraeth cpksfc_s   wstoll PD       0:00      1 (JobArrayTaskLimit)
+        2042826_75   teraeth cpks_sc-   wstoll  R    2:14:30      1 bhd0132
+        2042826_74   teraeth cpks_sc-   wstoll  R    4:00:18      1 bhd0127
+        2049042_61   teraeth cpksfc_s   wstoll  R       7:39      1 bhd0126
+        2049042_60   teraeth cpksfc_s   wstoll  R      11:53      1 bhd0135
