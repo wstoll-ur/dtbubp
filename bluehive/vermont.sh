@@ -40,8 +40,18 @@ run)
   tag=${name}_${h}_t${task}_$(date +%m%d_%H%M%S)
   for n in $nodes; do
     $SSH $n "mkdir -p $rdir" || exit 1
-    # inputs (and any finished outputs, so finished frames are skipped); job script with node-local paths
-    rsync -a --exclude '*_vermont_*.log' -e "$SSH" $ldir/ $n:$rdir/ || exit 1
+    # inputs (and any finished outputs, so finished frames are skipped); job script with node-local paths.
+    # A labelling folder (chunk_<task>.txt present) copies only that chunk's frame folders, not all 2200.
+    if [ -f $ldir/chunk_$task.txt ]; then
+      list=$(mktemp); { echo chunk_$task.txt; cat $ldir/chunk_$task.txt; } > $list
+      echo "copying chunk $task ($(($(wc -l < $list) - 1)) frame folders) to $n:$rdir ..."
+      rsync -a -r --files-from=$list --exclude '*_vermont_*.log' -e "$SSH" $ldir/ $n:$rdir/ || { rm -f $list; exit 1; }
+      rm -f $list
+    else
+      echo "copying $(du -sh $ldir | cut -f1) to $n:$rdir ..."
+      rsync -a --exclude '*_vermont_*.log' -e "$SSH" $ldir/ $n:$rdir/ || exit 1
+    fi
+    echo "  copied"
     sed -e "s#$REPO#$RROOT#g" -e "s#/scratch/$USER/DtBuDp/DtBuDp#$RROOT#g" -e "s#/gpfs/fs2$RROOT#$RROOT#g" $script \
       | $SSH $n "cat > $rdir/$name.vermont.sh"
   done
