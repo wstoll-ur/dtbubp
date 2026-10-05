@@ -2,6 +2,8 @@
 
 **Project lab notebook.** This file is the single source of truth for what has been done, why, with which settings, and where the files are. Every calculation, decision, and file move gets an entry here. Newest log entries go at the bottom of §9 (Changelog).
 
+**Codex–Claude handoff rule (Will, 2026-10-05).** Read this log and sync the GitHub checkout before starting work. After every substantive task, update this file with changes, settings, validation, decisions, current run status, and the exact next steps. Distinguish prepared/pushed inputs from jobs actually launched or completed; never infer live cluster status from old notes. Keep the Box copy and GitHub copy synchronized, preserving newer entries from either assistant. Commit and push scripts and their accompanying log updates together so Will can pull on BlueHive and switch between Codex and Claude without losing context.
+
 | | |
 |---|---|
 | System | 4,4′-di-*tert*-butylbiphenyl (DtBuBP; folder name "DtBuDp"), C₂₀H₂₆ |
@@ -762,6 +764,11 @@ Reuse from 9MA: `npt_al.py` (driver pattern, CP2K parsers, stress conversion, Sl
 - Retains level 12 PBE-D3(BJ)+C9 / DZVP-MOLOPT-SR-GTH settings and a fresh ATOMIC SCF guess. Creates a separate timestamped `01_dft_benchmark/from06_*/` directory to prevent the existing level-12 restart from overriding the seed. Uses 24 MPI ranks on bhx0124, following the latest cluster update.
 - Verified preparation in an isolated temporary repository, atom count, target electronic settings, absence of inherited restart files, and shell syntax. Will stops the existing registered run and launches the replacement after pulling GitHub; Codex has not changed the remote running job.
 - GitHub workflow (Will's preference): Codex maintains a separate checkout outside Box, copies only intended changes into it, and commits/pushes scripts so BlueHive can pull. Check remote changes before each push; do not overwrite newer Claude or BlueHive updates.
+
+### 2026-10-05 — Persistent Codex–Claude handoff rule recorded (Will, Codex)
+- Will explicitly requested keeping `PROJECT_LOG.md` updated so work can move between Codex and Claude. Added the standing rule near the top of this file.
+- Synced the separate GitHub checkout first and verified its log matched the Box copy. Updated both copies and committed/pushed the handoff rule.
+- Current handoff: `bluehive/start_level12_from06.sh` was pushed in commit `2e53416`; it prepares a fresh level-12 run from level 06 saved step 154 and launches on bhx0124. Will has the stop/relaunch commands. No confirmation yet that the replacement run was launched; the previous level-12 job's live status has not been checked by Codex.
 
 ## 10. References
 
