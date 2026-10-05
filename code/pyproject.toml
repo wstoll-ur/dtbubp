@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dtbubp"
+version = "0.1.0"
+description = "CP2K labels (E, F, stress, dipole, polarizability) and MACE fine-tuning for DtBuBP crystals"
+requires-python = ">=3.10"
+dependencies = ["numpy", "tomli; python_version < '3.11'"]
+
+[project.optional-dependencies]
+plot = ["matplotlib"]
+mace = ["ase", "mace-torch"]
+test = ["pytest", "ase"]
+
+[project.scripts]
+dtb = "dtbubp.cli:main"
+
+[tool.setuptools]
+packages = ["dtbubp"]

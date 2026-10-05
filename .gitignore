@@ -1,0 +1,49 @@
+# Whitelist: only code, configs, notes, the selected frames and small results go to GitHub.
+# Never: trajectories (legacy/), per-frame DFT inputs/outputs (label/, smoketest/), models, CIFs (CSD licence).
+/*
+!/.gitignore
+!/README.md
+!/PROJECT_LOG.md
+!/code/
+!/bluehive/
+!/Calculations/
+/Calculations/*
+!/Calculations/01_dft_benchmark/
+!/Calculations/02_dft_dataset/
+!/Calculations/02_dft_dataset_r1_pbe-d3bj_tzv2p/
+!/Calculations/04_npt_ramp_78-300K/
+
+# inside the whitelisted calculation folders: only these
+/Calculations/**/label/
+/Calculations/**/smoketest/*/
+/Calculations/**/parsed/
+/Calculations/**/inputs/
+/Calculations/**/outputs/
+/Calculations/**/T[0-9]*/
+/Calculations/**/*.out
+!/Calculations/**/smoketest/smoke_job*.out
+/Calculations/**/*.wfn*
+/Calculations/**/*.bak*
+/Calculations/**/*-pos-*.xyz
+/Calculations/**/*.pth
+/Calculations/**/*.model
+/Calculations/01_dft_benchmark/[A-F]_*/
+/Calculations/01_dft_benchmark/00_structure_prep/
+
+# python / OS
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+/Calculations/**/*.data
+/Calculations/**/srun.log
+
+# written/changed by the jobs on the cluster (copied into bluehive/reports/ by push_reports.sh instead),
+# so that `git pull` there never conflicts
+/Calculations/**/LOG.md
+/Calculations/**/state.json
+/Calculations/**/*_job*.sh
+/Calculations/**/levels.txt
+/Calculations/**/runs_*.txt
+# bench runs: Leonardo results stay in Box (summary in PROJECT_LOG); BlueHive's go to bluehive/reports/
+/Calculations/01_dft_benchmark/cellopt/

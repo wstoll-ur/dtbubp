@@ -1,0 +1,124 @@
+{
+ "toml_sha256": "2a91485693907e626fb5840785c6a31a3478ef96acc3fdcbd91044eb998bdf29",
+ "cfg": {
+  "paths": {
+   "code_dir": "../../code",
+   "start_dir": "../04_npt_ramp_78-300K/fixedT_r0/eos/V430",
+   "dft_config": "../02_dft_dataset/config.toml",
+   "run_dir": "cellopt"
+  },
+  "bench": {
+   "max_iter": 300,
+   "pressure_tol_bar": 100.0,
+   "max_force_au": 0.00045,
+   "ranks": 112,
+   "time_limit": "24:00:00",
+   "levels": [
+    {
+     "name": "01_blyp_d3_dzvpsr",
+     "description": "CONTROL = r0 label level (BLYP-D3(zero), DZVP-MOLOPT-SR). EOS predicts ~377 A^3/molecule",
+     "functional": "BLYP",
+     "dispersion": "D3",
+     "basis": "DZVP-MOLOPT-SR-GTH"
+    },
+    {
+     "name": "02_blyp_d3_dzvp",
+     "description": "BLYP-D3(zero), DZVP-MOLOPT (non-SR, more diffuse)",
+     "functional": "BLYP",
+     "dispersion": "D3",
+     "basis": "DZVP-MOLOPT-GTH"
+    },
+    {
+     "name": "03_blyp_d3_tzv2p",
+     "description": "BLYP-D3(zero), TZV2P-MOLOPT: basis-set (BSSE) effect",
+     "functional": "BLYP",
+     "dispersion": "D3",
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "04_blyp_d3bj_tzv2p",
+     "description": "BLYP-D3(BJ), TZV2P-MOLOPT: damping",
+     "functional": "BLYP",
+     "dispersion": "D3BJ",
+     "c9": false,
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "05_blyp_d3bj_c9_tzv2p",
+     "description": "BLYP-D3(BJ)+C9 (Axilrod-Teller-Muto three-body), TZV2P-MOLOPT",
+     "functional": "BLYP",
+     "dispersion": "D3BJ",
+     "c9": true,
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "06_pbe_d3bj_tzv2p",
+     "description": "PBE-D3(BJ), TZV2P-MOLOPT",
+     "functional": "PBE",
+     "dispersion": "D3BJ",
+     "c9": false,
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "07_revpbe_d3bj_tzv2p",
+     "description": "revPBE-D3(BJ), TZV2P-MOLOPT",
+     "functional": "revPBE",
+     "dispersion": "D3BJ",
+     "c9": false,
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "08_revpbe_d3bj_c9_tzv2p",
+     "description": "revPBE-D3(BJ)+C9, TZV2P-MOLOPT",
+     "functional": "revPBE",
+     "dispersion": "D3BJ",
+     "c9": true,
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "09_rvv10_tzv2p",
+     "description": "rVV10 (rPW86-PBE + non-local VV10), TZV2P-MOLOPT. Needs libxc; may not run in 2024.1",
+     "functional": "rVV10",
+     "dispersion": "none",
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "10_pbe_d3bj_dzvpsr",
+     "description": "PBE-D3(BJ), DZVP-MOLOPT-SR: cheap counterpart of 06",
+     "functional": "PBE",
+     "dispersion": "D3BJ",
+     "c9": false,
+     "basis": "DZVP-MOLOPT-SR-GTH"
+    },
+    {
+     "name": "11_pbe_d3bj_c9_tzv2p",
+     "description": "PBE-D3(BJ)+C9, TZV2P-MOLOPT (added after r1 interim: PBE-D3(BJ) least dense, C9 adds ~+1 %)",
+     "functional": "PBE",
+     "dispersion": "D3BJ",
+     "c9": true,
+     "basis": "TZV2P-MOLOPT-GTH"
+    },
+    {
+     "name": "12_pbe_d3bj_c9_dzvpsr",
+     "description": "PBE-D3(BJ)+C9, DZVP-MOLOPT-SR: cheap counterpart of 11 (label cost)",
+     "functional": "PBE",
+     "dispersion": "D3BJ",
+     "c9": true,
+     "basis": "DZVP-MOLOPT-SR-GTH"
+    }
+   ]
+  },
+  "experiment": {
+   "V_per_molecule_80K": 400.9,
+   "V_per_molecule_298K": 430.0,
+   "cell_298": [
+    8.234,
+    10.1638,
+    11.8166,
+    66.646,
+    83.975,
+    71.361
+   ]
+  }
+ }
+}

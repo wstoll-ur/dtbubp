@@ -1,0 +1,103 @@
+! DtBuBP DFT label: energy, forces, stress tensor, Berry-phase dipole and periodic polarizability
+! in ONE run. Level of theory = every 9MA DFT run (BLYP-D3, DZVP-MOLOPT-SR-GTH, GTH-BLYP, 600/60 Ry,
+! NN10 smoothing) + LINRES/POLAR + MOMENTS. Written by dtbubp; do not edit by hand.
+&GLOBAL
+  PROJECT label
+  RUN_TYPE ENERGY_FORCE
+  PRINT_LEVEL MEDIUM
+&END GLOBAL
+
+&FORCE_EVAL
+  METHOD Quickstep
+  STRESS_TENSOR ANALYTICAL
+  &PRINT
+    &FORCES
+    &END FORCES
+    &STRESS_TENSOR
+    &END STRESS_TENSOR
+  &END PRINT
+  &DFT
+    BASIS_SET_FILE_NAME  BASIS_MOLOPT
+    POTENTIAL_FILE_NAME  POTENTIAL
+    &MGRID
+      CUTOFF      600
+      REL_CUTOFF  60
+      NGRIDS      5
+    &END MGRID
+    &QS
+      EPS_DEFAULT  1.0E-16
+    &END QS
+
+    &SCF
+      SCF_GUESS  ATOMIC
+      MAX_SCF    50
+      EPS_SCF    1.0E-08
+      &OT
+        PRECONDITIONER  FULL_KINETIC
+        MINIMIZER       DIIS
+      &END OT
+      &OUTER_SCF
+        MAX_SCF  10
+        EPS_SCF  1.0E-08
+      &END OUTER_SCF
+      &PRINT
+        &RESTART OFF
+        &END RESTART
+      &END PRINT
+    &END SCF
+    &XC
+      &XC_FUNCTIONAL BLYP
+      &END XC_FUNCTIONAL
+      &XC_GRID
+        XC_DERIV       NN10_SMOOTH
+        XC_SMOOTH_RHO  NN10
+      &END XC_GRID
+      &vdW_POTENTIAL
+        DISPERSION_FUNCTIONAL PAIR_POTENTIAL
+        &PAIR_POTENTIAL
+          TYPE                  DFTD3
+          PARAMETER_FILE_NAME   dftd3.dat
+          REFERENCE_FUNCTIONAL  BLYP
+        &END PAIR_POTENTIAL
+      &END vdW_POTENTIAL
+    &END XC
+    &PRINT
+      &MOMENTS
+        PERIODIC   T
+        REFERENCE  ZERO
+        MAX_MOMENT 1
+      &END MOMENTS
+    &END PRINT
+  &END DFT
+  &PROPERTIES
+    &LINRES
+      PRECONDITIONER  FULL_ALL
+      EPS             1.0E-08
+      MAX_ITER        300
+      &POLAR
+        DO_RAMAN                  T
+        PERIODIC_DIPOLE_OPERATOR  T
+      &END POLAR
+    &END LINRES
+  &END PROPERTIES
+  &SUBSYS
+    &CELL
+      A     8.2339655592     0.0000000000     0.0000000000
+      B     3.2483814128     9.6306797171     0.0000000000
+      C     1.2402938122     4.5251450724    10.8450726376
+      PERIODIC  XYZ
+    &END CELL
+    &TOPOLOGY
+      COORD_FILE_NAME    coord.xyz
+      COORD_FILE_FORMAT  XYZ
+    &END TOPOLOGY
+    &KIND C
+      BASIS_SET  DZVP-MOLOPT-SR-GTH
+      POTENTIAL  GTH-BLYP-q4
+    &END KIND
+    &KIND H
+      BASIS_SET  DZVP-MOLOPT-SR-GTH
+      POTENTIAL  GTH-BLYP-q1
+    &END KIND
+  &END SUBSYS
+&END FORCE_EVAL

@@ -1,0 +1,94 @@
+! DtBuBP level-of-theory benchmark: full cell optimisation (atoms + all six cell parameters) at P = 1 bar.
+! Level {{NAME}}: {{DESCRIPTION}}
+! Grid/SCF settings = the r0 label deck (600/60 Ry, NN10 smoothing). Written by dtbubp.bench; do not edit by hand.
+&GLOBAL
+  PROJECT bench
+  RUN_TYPE CELL_OPT
+  PRINT_LEVEL LOW
+&END GLOBAL
+&MOTION
+  &CELL_OPT
+    TYPE                DIRECT_CELL_OPT
+    OPTIMIZER           BFGS
+    MAX_ITER            {{MAX_ITER}}
+    EXTERNAL_PRESSURE   1.0
+    PRESSURE_TOLERANCE  {{P_TOL_BAR}}
+    MAX_FORCE           {{MAX_FORCE}}
+    KEEP_ANGLES         F
+    KEEP_SYMMETRY       F
+  &END CELL_OPT
+  &PRINT
+    &CELL
+      &EACH
+        CELL_OPT 1
+      &END EACH
+    &END CELL
+    &TRAJECTORY
+      &EACH
+        CELL_OPT 1
+      &END EACH
+    &END TRAJECTORY
+    &RESTART
+      BACKUP_COPIES 1
+      &EACH
+        CELL_OPT 1
+      &END EACH
+    &END RESTART
+  &END PRINT
+&END MOTION
+&FORCE_EVAL
+  METHOD Quickstep
+  STRESS_TENSOR ANALYTICAL
+  &PRINT
+    &STRESS_TENSOR
+    &END STRESS_TENSOR
+  &END PRINT
+  &DFT
+    BASIS_SET_FILE_NAME  BASIS_MOLOPT
+    POTENTIAL_FILE_NAME  POTENTIAL
+    &MGRID
+      CUTOFF      {{CUTOFF}}
+      REL_CUTOFF  {{REL_CUTOFF}}
+      NGRIDS      5
+    &END MGRID
+    &QS
+      EPS_DEFAULT  {{EPS_DEFAULT}}
+    &END QS
+    &SCF
+      SCF_GUESS  ATOMIC
+      MAX_SCF    {{MAX_SCF}}
+      EPS_SCF    {{EPS_SCF}}
+      &OT
+        PRECONDITIONER  FULL_KINETIC
+        MINIMIZER       DIIS
+      &END OT
+      &OUTER_SCF
+        MAX_SCF  10
+        EPS_SCF  {{EPS_SCF}}
+      &END OUTER_SCF
+    &END SCF
+    &XC
+{{XC_FUNCTIONAL}}
+{{XC_GRID}}
+{{VDW}}
+    &END XC
+  &END DFT
+  &SUBSYS
+    &CELL
+{{CELL}}
+      PERIODIC  XYZ
+    &END CELL
+    &TOPOLOGY
+      COORD_FILE_NAME    coord.xyz
+      COORD_FILE_FORMAT  XYZ
+    &END TOPOLOGY
+    &KIND C
+      BASIS_SET  {{BASIS}}
+      POTENTIAL  GTH-{{PSEUDO}}-q4
+    &END KIND
+    &KIND H
+      BASIS_SET  {{BASIS}}
+      POTENTIAL  GTH-{{PSEUDO}}-q1
+    &END KIND
+  &END SUBSYS
+&END FORCE_EVAL

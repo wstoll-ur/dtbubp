@@ -1,0 +1,223 @@
+{
+ "toml_sha256": "ed4f136a81aa13a30629574d75f560aa5ba0bfe943a47efa1aa70e3923fd6e80",
+ "cfg": {
+  "paths": {
+   "code_dir": "../../../code",
+   "frames": "../../02_dft_dataset/frame_selection/frames.extxyz",
+   "model_cp2k": "../../03_mace_finetune/models/potential_r0/dtbubp_pot_r0_stagetwo.model-cp2k.pth",
+   "labels": "../../02_dft_dataset/parsed/labels.xyz",
+   "dft_config": "../../02_dft_dataset/config.toml",
+   "run_dir": "."
+  },
+  "npt": {
+   "temperatures": [
+    298,
+    260,
+    220,
+    180,
+    120,
+    80
+   ],
+   "supercell": [
+    2,
+    2,
+    2
+   ],
+   "ensemble": "NPT_F",
+   "time_ps": 100.0,
+   "discard_ps": 20.0,
+   "timestep_fs": 0.5,
+   "thermostat_timecon_fs": 100.0,
+   "barostat_timecon_fs": 1000.0,
+   "pressure_bar": 1.0,
+   "print_every": 20,
+   "traj_every": 400,
+   "restart_every": 10000,
+   "v_watchdog": [
+    0.8,
+    1.25
+   ],
+   "time_limit": "24:00:00"
+  },
+  "eos": {
+   "v_per_molecule": [
+    350.0,
+    365.0,
+    380.0,
+    395.0,
+    410.0,
+    430.0,
+    450.0,
+    470.0
+   ],
+   "fmax": 0.01,
+   "max_steps": 500
+  },
+  "experiment": {
+   "T_K": [
+    80,
+    90,
+    100,
+    120,
+    140,
+    150,
+    160,
+    170,
+    180,
+    190,
+    200,
+    205,
+    210,
+    215,
+    220,
+    240,
+    260,
+    280,
+    298
+   ],
+   "V_per_molecule_A3": [
+    400.9,
+    402.8,
+    404.4,
+    405.5,
+    407.2,
+    408.0,
+    412.7,
+    413.7,
+    414.7,
+    416.1,
+    416.9,
+    417.8,
+    418.1,
+    419.7,
+    420.2,
+    422.6,
+    425.1,
+    427.7,
+    430.0
+   ],
+   "cell_298": [
+    8.234,
+    10.1638,
+    11.8166,
+    66.646,
+    83.975,
+    71.361
+   ],
+   "phases": [
+    {
+     "name": "III",
+     "Z": 10,
+     "space_group": "P-1",
+     "T_max": 155.0
+    },
+    {
+     "name": "II",
+     "Z": 12,
+     "space_group": "P-1",
+     "T_min": 155.0,
+     "T_max": 212.0
+    },
+    {
+     "name": "I",
+     "Z": 2,
+     "space_group": "P-1",
+     "T_min": 212.0
+    }
+   ],
+   "xrd": [
+    {
+     "T": 298.0,
+     "phase": "I",
+     "Z": 2,
+     "V_cell": 860.01,
+     "cell": [
+      8.234,
+      10.1638,
+      11.8166,
+      66.646,
+      83.975,
+      71.361
+     ],
+     "source": "298k.cif (was Data/crystal_structures/)"
+    },
+    {
+     "T": 215.0,
+     "phase": "I",
+     "Z": 2,
+     "V_cell": 839.54,
+     "cell": [
+      8.2368,
+      10.0409,
+      11.7105,
+      67.039,
+      83.756,
+      70.345
+     ],
+     "source": "Structures/215_heating/5_215.cif (heating)"
+    },
+    {
+     "T": 180.0,
+     "phase": "II",
+     "Z": 12,
+     "V_cell": 4977.33,
+     "cell": [
+      8.1439,
+      23.1803,
+      26.5087,
+      92.011,
+      91.075,
+      95.452
+     ],
+     "source": "Structures/180/1_180.cif"
+    },
+    {
+     "T": 160.0,
+     "phase": "II",
+     "Z": 12,
+     "V_cell": 4952.06,
+     "cell": [
+      8.1301,
+      23.1269,
+      26.4805,
+      92.164,
+      91.157,
+      95.384
+     ],
+     "source": "160k.cif (values from legacy validate_160.in; CIF not in folder)"
+    },
+    {
+     "T": 150.0,
+     "phase": "III",
+     "Z": 10,
+     "V_cell": 4079.79,
+     "cell": [
+      7.1465,
+      23.4247,
+      25.7589,
+      108.558,
+      93.185,
+      90.609
+     ],
+     "source": "Structures/150/4_150.cif"
+    }
+   ]
+  },
+  "env": {
+   "cp2k_mace": "module purge\nmodule load profile/base\nmodule load openmpi/4.1.6--gcc--12.2.0\nmodule load cuda/12.6\nmodule load python/3.11.7\nsource $HOME/cp2k_torch_env/bin/activate\nsource $HOME/software/cp2k-2026.2/tools/toolchain/install/setup\nsource $HOME/cp2k_torch_env/bin/activate\nexport TORCH_LIB=$(python -c 'import torch, os; print(os.path.join(os.path.dirname(torch.__file__), \"lib\"))')\nexport LD_LIBRARY_PATH=$HOME/software/cp2k-mace/install/lib64:${LD_LIBRARY_PATH}\nexport LD_LIBRARY_PATH=$HOME/software/libxc-7.1.2/install/lib64:${LD_LIBRARY_PATH}\nexport LD_LIBRARY_PATH=${TORCH_LIB}:${LD_LIBRARY_PATH}\nexport LD_LIBRARY_PATH=$HOME/software/plumed-2.10.0/install/lib:${LD_LIBRARY_PATH}\nexport OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-8}\nexport OMP_PLACES=cores\nexport OMP_PROC_BIND=spread\nexport PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True\nexport CP2K=$HOME/software/cp2k-mace/install/bin/cp2k.psmp\n"
+  },
+  "slurm": {
+   "gpu": {
+    "account": "IscrB_MET2SAF",
+    "partition": "boost_usr_prod",
+    "qos": "normal",
+    "extra": [
+     "--nodes=1",
+     "--ntasks=1",
+     "--cpus-per-task=8",
+     "--gres=gpu:1"
+    ]
+   }
+  }
+ }
+}

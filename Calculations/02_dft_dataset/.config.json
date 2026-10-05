@@ -1,0 +1,174 @@
+{
+ "toml_sha256": "76f47450589a35fc28acc6ed15b231f75bb7d16e9af8147e5e92400acbbcd0a5",
+ "cfg": {
+  "paths": {
+   "code_dir": "../../code",
+   "selection_dir": "frame_selection",
+   "parsed_dir": "parsed",
+   "potential_dir": "../03_mace_finetune/models/potential_r0",
+   "dielectric_dir": "../03_mace_finetune/models/dielectric_r0",
+   "foundation_potential": "../03_mace_finetune/foundation/MACE-OFF23_small.model",
+   "foundation_dielectric": "../03_mace_finetune/foundation/MACE-MDP.model",
+   "create_cp2k_model": "../../code/tools/create_cp2k_model.py"
+  },
+  "select": {
+   "dump": "../legacy/mace-off23-small_fixdeform/all_1.lammpstrj",
+   "tbu_dat": "../legacy/mace-off23-small_fixdeform/tbu_rotations.dat",
+   "biphenyl_dat": "../legacy/mace-off23-small_fixdeform/tbu_rotations_biphenyl.dat",
+   "n_frames": 2000,
+   "bin_K": 10.0,
+   "even_fraction": 0.5,
+   "min_gap_fs": 250.0,
+   "seed": 1
+  },
+  "strain": {
+   "n_frames": 200,
+   "iso_min": -0.04,
+   "iso_max": 0.05,
+   "dev_sigma": 0.01,
+   "dev_max": 0.025,
+   "affine_max": 0.015,
+   "min_contact_A": 1.75,
+   "seed": 2
+  },
+  "split": {
+   "block_ns": 0.2,
+   "period": 10,
+   "test_blocks": [
+    3
+   ],
+   "valid_blocks": [
+    8
+   ]
+  },
+  "dft": {
+   "cutoff": 600,
+   "rel_cutoff": 60,
+   "eps_default": "1.0E-16",
+   "eps_scf": "1.0E-08",
+   "max_scf": 50,
+   "xc_smoothing": true,
+   "debug_field_au": 0.0005,
+   "max_force_ev_a": 25.0,
+   "cores_per_node": 112,
+   "frames_per_node": 4,
+   "mem_per_node_gb": 480,
+   "frame_timeout_min": 40,
+   "chunks": 30,
+   "time_limit": "06:00:00",
+   "smoke_time_limit": "02:00:00",
+   "linres": {
+    "preconditioner": "FULL_ALL",
+    "eps": "1.0E-08",
+    "max_iter": 300
+   }
+  },
+  "env": {
+   "dft": "module purge\nmodule load profile/chem-phys\nmodule load cp2k/2024.1--intel-oneapi-mpi--2021.10.0--intel--2021.10.0\nexport CP2K_DATA_DIR=$CP2K_HOME/share/data\n",
+   "mace": "module purge\nmodule load profile/base\nmodule load gcc/12.2.0\nmodule load cuda/12.6\nmodule load python/3.11.7\nsource $HOME/cp2k_torch_env/bin/activate   # mace-torch 0.3.16, python 3.11.7\nexport PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True\n",
+   "cp2k_mace": "module purge\nmodule load profile/base\nmodule load openmpi/4.1.6--gcc--12.2.0\nmodule load cuda/12.6\nmodule load python/3.11.7\nsource $HOME/cp2k_torch_env/bin/activate\n"
+  },
+  "slurm": {
+   "cpu": {
+    "account": "IscrB_MET2SAF_0",
+    "partition": "dcgp_usr_prod",
+    "qos": "normal",
+    "extra": [
+     "--nodes=1",
+     "--ntasks-per-node=112",
+     "--cpus-per-task=1",
+     "--exclusive"
+    ]
+   },
+   "gpu": {
+    "account": "IscrB_MET2SAF",
+    "partition": "boost_usr_prod",
+    "qos": "normal",
+    "extra": [
+     "--nodes=1",
+     "--ntasks=1",
+     "--cpus-per-task=8",
+     "--gres=gpu:1"
+    ]
+   }
+  },
+  "train_potential": {
+   "name": "dtbubp_pot_r0",
+   "seed": 1,
+   "time_limit": "24:00:00",
+   "args": [
+    "--E0s=average",
+    "--energy_key=REF_energy",
+    "--forces_key=REF_forces",
+    "--stress_key=REF_stress",
+    "--compute_stress=True",
+    "--loss=stress",
+    "--energy_weight=10.0",
+    "--forces_weight=10.0",
+    "--stress_weight=10000.0",
+    "--error_table=PerAtomRMSEstressvirials",
+    "--lr=1e-3",
+    "--ema",
+    "--ema_decay=0.999",
+    "--clip_grad=1.0",
+    "--weight_decay=0.0",
+    "--batch_size=16",
+    "--valid_batch_size=16",
+    "--max_num_epochs=500",
+    "--swa",
+    "--start_swa=400",
+    "--swa_lr=1e-4",
+    "--swa_energy_weight=10.0",
+    "--swa_forces_weight=100.0",
+    "--swa_stress_weight=10000.0",
+    "--freeze=4",
+    "--restart_latest",
+    "--default_dtype=float64",
+    "--device=cuda"
+   ]
+  },
+  "train_dielectric": {
+   "name": "dtbubp_diel_r0",
+   "seed": 1,
+   "time_limit": "24:00:00",
+   "mode": "scratch",
+   "args": [
+    "--model=AtomicDielectricMACE",
+    "--loss=dipole_polar",
+    "--error_table=DipolePolarRMSE",
+    "--dipole_key=REF_dipole",
+    "--polarizability_key=REF_polarizability",
+    "--compute_polarizability=True",
+    "--dipole_weight=1.0",
+    "--polarizability_weight=10.0",
+    "--E0s=average",
+    "--lr=1e-2",
+    "--scheduler_patience=5",
+    "--ema",
+    "--ema_decay=0.99",
+    "--clip_grad=10.0",
+    "--batch_size=8",
+    "--valid_batch_size=8",
+    "--max_num_epochs=500",
+    "--swa",
+    "--start_swa=400",
+    "--swa_lr=1e-3",
+    "--swa_dipole_weight=1.0",
+    "--swa_polarizability_weight=10.0",
+    "--restart_latest",
+    "--default_dtype=float64",
+    "--device=cuda"
+   ],
+   "scratch_args": [
+    "--r_max=5.0",
+    "--num_interactions=2",
+    "--correlation=3",
+    "--max_ell=3",
+    "--hidden_irreps=64x0e+64x1o+64x2e",
+    "--MLP_irreps=16x0e+16x1o+16x2e",
+    "--num_radial_basis=8",
+    "--num_cutoff_basis=5"
+   ]
+  }
+ }
+}

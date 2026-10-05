@@ -1,0 +1,77 @@
+! DtBuBP DFT label: energy, forces, stress tensor, Berry-phase dipole and periodic polarizability
+! in ONE run. Level of theory: {{LEVEL}}
+! (r0 = the 9MA level BLYP-D3/DZVP-MOLOPT-SR-GTH/GTH-BLYP, 600/60 Ry, NN10 smoothing) + LINRES/POLAR + MOMENTS.
+! Written by dtbubp; do not edit by hand.
+&GLOBAL
+  PROJECT label
+  RUN_TYPE {{RUN_TYPE}}
+  PRINT_LEVEL MEDIUM
+&END GLOBAL
+{{DEBUG}}
+&FORCE_EVAL
+  METHOD Quickstep
+  STRESS_TENSOR {{STRESS}}
+  &PRINT
+    &FORCES
+    &END FORCES
+    &STRESS_TENSOR
+    &END STRESS_TENSOR
+  &END PRINT
+  &DFT
+    BASIS_SET_FILE_NAME  BASIS_MOLOPT
+    POTENTIAL_FILE_NAME  POTENTIAL
+    &MGRID
+      CUTOFF      {{CUTOFF}}
+      REL_CUTOFF  {{REL_CUTOFF}}
+      NGRIDS      5
+    &END MGRID
+    &QS
+      EPS_DEFAULT  {{EPS_DEFAULT}}
+    &END QS
+{{EFIELD}}
+    &SCF
+      SCF_GUESS  ATOMIC
+      MAX_SCF    {{MAX_SCF}}
+      EPS_SCF    {{EPS_SCF}}
+      &OT
+        PRECONDITIONER  FULL_KINETIC
+        MINIMIZER       DIIS
+      &END OT
+      &OUTER_SCF
+        MAX_SCF  10
+        EPS_SCF  {{EPS_SCF}}
+      &END OUTER_SCF
+      &PRINT
+        &RESTART OFF
+        &END RESTART
+      &END PRINT
+    &END SCF
+    &XC
+{{XC_FUNCTIONAL}}
+{{XC_GRID}}
+{{VDW}}
+    &END XC
+    &PRINT
+{{MOMENTS}}
+    &END PRINT
+  &END DFT
+{{PROPERTIES}}
+  &SUBSYS
+    &CELL
+{{CELL}}
+      PERIODIC  XYZ
+    &END CELL
+    &TOPOLOGY
+      COORD_FILE_NAME    coord.xyz
+      COORD_FILE_FORMAT  XYZ
+    &END TOPOLOGY
+    &KIND C
+      BASIS_SET  {{BASIS}}
+      POTENTIAL  GTH-{{PSEUDO}}-q4
+    &END KIND
+    &KIND H
+      BASIS_SET  {{BASIS}}
+      POTENTIAL  GTH-{{PSEUDO}}-q1
+    &END KIND
+  &END SUBSYS
+&END FORCE_EVAL

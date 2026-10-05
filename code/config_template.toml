@@ -1,0 +1,147 @@
+# dtbubp campaign r0: label MACE-OFF23 fix-deform frames with CP2K (E, F, stress, dipole, polarizability),
+# then fine-tune MACE (potential + dielectric). Every relative path is relative to THIS file's folder.
+# Copy this file into the campaign folder (Calculations/02_dft_dataset/config.toml) and edit there.
+
+[paths]
+code_dir              = "../../code"                      # this repository (put on PYTHONPATH by the jobs)
+selection_dir         = "frame_selection"                 # frames.extxyz, selection.json, selection.png
+parsed_dir            = "parsed"                          # labels.xyz, train/valid/test.xyz
+potential_dir         = "../03_mace_finetune/models/potential_r0"
+dielectric_dir        = "../03_mace_finetune/models/dielectric_r0"
+foundation_potential  = "../03_mace_finetune/foundation/MACE-OFF23_small.model"   # same file as 9MA npt_al/old_data
+foundation_dielectric = "../03_mace_finetune/foundation/MACE-MDP.model"           # only for mode = "finetune_mdp" (not used)
+create_cp2k_model     = "../../code/tools/create_cp2k_model.py"                     # Will's exporter (from 9MA/cp2k)
+
+[select]
+dump          = "../legacy/mace-off23-small_fixdeform/all_1.lammpstrj"     # 197 389 frames, 300 -> 53 K
+tbu_dat       = "../legacy/mace-off23-small_fixdeform/tbu_rotations.dat"
+biphenyl_dat  = "../legacy/mace-off23-small_fixdeform/tbu_rotations_biphenyl.dat"
+n_frames      = 2000          # fix-deform frames to label (Will, 2026-10-04)
+bin_K         = 10.0          # temperature bins; each bin gets the same share of frames
+even_fraction = 0.5           # per bin: this fraction evenly spaced in time, the rest by farthest-point sampling
+min_gap_fs    = 250.0         # no two frames of one bin closer in time than this (5 dump frames)
+seed          = 1
+
+[strain]
+# Strained copies so the stress is learnt beyond the fix-deform volumes (MACE-OFF23 collapses to -11 % V in NPT;
+# 9MA NPT blew up on the expanded side until expanded cells were labelled). Set n_frames = 0 to skip.
+n_frames      = 200
+iso_min       = -0.04         # linear isotropic strain range (volume -11.5 % ... +15.8 %)
+iso_max       = 0.05
+dev_sigma     = 0.010         # deviatoric (shape) strain, per component
+dev_max       = 0.025
+affine_max    = 0.015         # 1 in 4 strained frames is affine (atoms follow the cell): small amplitude
+min_contact_A = 1.75          # reject (shrink) a strain that brings two molecules closer than this
+seed          = 2
+
+[split]
+# by time block, never by random frame: block = floor(time_ns / block_ns); block % period in test/valid lists
+block_ns     = 0.2            # 0.2 ns = 5 K of the ramp
+period       = 10
+test_blocks  = [3]            # -> ~10 % test, spread over the whole temperature range
+valid_blocks = [8]            # -> ~10 % validation
+
+[dft]
+# Level of theory = every 9MA DFT label (Will, 2026-10-04: skip the benchmark for now, use the 9MA settings)
+cutoff        = 600
+rel_cutoff    = 60
+eps_default   = "1.0E-16"
+eps_scf       = "1.0E-08"
+max_scf       = 50
+xc_smoothing  = true          # XC_DERIV NN10_SMOOTH + XC_SMOOTH_RHO NN10, as 9MA (the smoke test checks LINRES with it)
+debug_field_au = 0.0005       # smoke test: finite field for the polarizability check (a.u.)
+max_force_ev_a = 25.0         # drop a labelled frame above this (broken structure)
+# packing: one exclusive DCGP node (112 cores) runs `frames_per_node` frames at once
+cores_per_node    = 112
+frames_per_node   = 4         # 28 MPI ranks per frame
+mem_per_node_gb   = 480       # split evenly between the concurrent frames (CHECK: DCGP nodes have 512 GB)
+frame_timeout_min = 40 
+chunks            = 30        # array tasks; ~73 frames each -> ~19 rounds of 4 frames x ~7 min = ~2.5 h per task (smoke test 2026-10-04)
+time_limit        = "06:00:00"
+smoke_time_limit  = "02:00:00"
+
+[dft.linres]
+preconditioner = "FULL_ALL"
+eps            = "1.0E-08"
+max_iter       = 300
+[env]
+dft = """
+module purge
+module load profile/chem-phys
+module load cp2k/2024.1--intel-oneapi-mpi--2021.10.0--intel--2021.10.0
+export CP2K_DATA_DIR=$CP2K_HOME/share/data
+"""
+mace = """
+module purge
+module load profile/base
+module load gcc/12.2.0
+module load cuda/12.6
+module load python/3.11.7
+source $HOME/cp2k_torch_env/bin/activate   # mace-torch 0.3.16, python 3.11.7
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+"""
+# only for the CP2K export of the potential (Will's cp2k_torch_env, from 9MA env_cp2k_mace.sh)
+cp2k_mace = """
+module purge
+module load profile/base
+module load openmpi/4.1.6--gcc--12.2.0
+module load cuda/12.6
+module load python/3.11.7
+source $HOME/cp2k_torch_env/bin/activate
+"""
+
+[slurm.cpu]
+account   = "IscrB_MET2SAF_0"
+partition = "dcgp_usr_prod"
+qos       = "normal"
+extra     = ["--nodes=1", "--ntasks-per-node=112", "--cpus-per-task=1", "--exclusive"]
+[slurm.gpu]
+account   = "IscrB_MET2SAF"
+partition = "boost_usr_prod"
+qos       = "normal"
+extra     = ["--nodes=1", "--ntasks=1", "--cpus-per-task=8", "--gres=gpu:1"]
+
+[train_potential]
+name       = "dtbubp_pot_r0"
+seed       = 1
+time_limit = "24:00:00"
+# = the 9MA npt_al settings (train3 + stress), with our own validation/test files instead of a random split
+args = [
+  "--E0s=average",
+  "--energy_key=REF_energy", "--forces_key=REF_forces", "--stress_key=REF_stress",
+  "--compute_stress=True", "--loss=stress",
+  "--energy_weight=10.0", "--forces_weight=10.0", "--stress_weight=10000.0",
+  "--error_table=PerAtomRMSEstressvirials",
+  "--lr=1e-3", "--ema", "--ema_decay=0.999", "--clip_grad=1.0", "--weight_decay=0.0",
+  "--batch_size=16", "--valid_batch_size=16", "--max_num_epochs=500",
+  "--swa", "--start_swa=400", "--swa_lr=1e-4",
+  "--swa_energy_weight=10.0", "--swa_forces_weight=100.0", "--swa_stress_weight=10000.0",
+  "--freeze=4", "--restart_latest", "--default_dtype=float64", "--device=cuda",
+]
+
+[train_dielectric]
+# Trained FROM SCRATCH. MACE-MDP cannot be fine-tuned with any released mace-torch (<= v0.3.16, May 2026):
+# released run_train only loads foundation models for energy models (MACE/ScaleShiftMACE/MACELES/PolarMACE);
+# `--finetune_dipoles_polarizabilities` exists only on the MACE main branch (added July 2026), untested on the MDP
+# checkpoint. MACE-MDP can still be used as a zero-shot baseline in evaluation (not implemented yet).
+name       = "dtbubp_diel_r0"
+seed       = 1
+time_limit = "24:00:00"
+mode       = "scratch"        # "finetune_mdp" only with mace-torch from the main branch (not recommended)
+args = [
+  "--model=AtomicDielectricMACE", "--loss=dipole_polar", "--error_table=DipolePolarRMSE",
+  "--dipole_key=REF_dipole", "--polarizability_key=REF_polarizability", "--compute_polarizability=True",
+  "--dipole_weight=1.0", "--polarizability_weight=10.0",
+  "--E0s=average",            # required by run_train even though AtomicDielectricMACE has no energies
+  "--lr=1e-2", "--scheduler_patience=5", "--ema", "--ema_decay=0.99", "--clip_grad=10.0",
+  "--batch_size=8", "--valid_batch_size=8", "--max_num_epochs=500",
+  "--swa", "--start_swa=400", "--swa_lr=1e-3", "--swa_dipole_weight=1.0", "--swa_polarizability_weight=10.0",
+  "--restart_latest", "--default_dtype=float64", "--device=cuda",
+]
+# architecture (scratch). Polarizability needs l = 2 (even) features: hidden 0e+1o+2e; the non-linear readout
+# gates 1o and 2e channels, so MLP_irreps must contain them too (NonLinearDipolePolarReadoutBlock, v0.3.16).
+scratch_args = [
+  "--r_max=5.0", "--num_interactions=2", "--correlation=3", "--max_ell=3",
+  "--hidden_irreps=64x0e+64x1o+64x2e", "--MLP_irreps=16x0e+16x1o+16x2e",
+  "--num_radial_basis=8", "--num_cutoff_basis=5",
+]

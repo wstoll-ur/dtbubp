@@ -1,0 +1,25 @@
+{
+ "fixdeform_frames": 2000,
+ "strained_frames": 200,
+ "total": 2200,
+ "broken_skipped": [],
+ "missing_steps": [],
+ "n_missing": 0,
+ "split_counts": {
+  "train": 1772,
+  "valid": 224,
+  "test": 204
+ },
+ "T_range_K": [
+  53.312,
+  299.874
+ ],
+ "V_range_A3": [
+  707.779471755776,
+  977.0666069085628
+ ],
+ "picks": {
+  "even": 989,
+  "fps": 1011
+ }
+}

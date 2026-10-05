@@ -1,0 +1,108 @@
+# dtbubp level-of-theory benchmark (CP2K CELL_OPT of the Z = 2 crystal). Copy into
+# Calculations/01_dft_benchmark/config.toml. Relative paths are relative to that folder.
+#   python -m dtbubp.cli --config <this file> bench-setup [--only name1,name2] [--dry-run]
+#   python -m dtbubp.cli --config <this file> bench-analyze        (any time: shows running levels too)
+
+[paths]
+code_dir   = "../../code"
+start_dir  = "../04_npt_ramp_78-300K/fixedT_r0/eos/V430"   # coord.xyz + meta.json (cell): exp 298 K volume, r0-relaxed molecules
+dft_config = "../02_dft_dataset/config.toml"               # cutoff/SCF settings, CP2K module, CPU Slurm account
+run_dir    = "cellopt"                                     # one sub-folder per level
+
+[bench]
+max_iter         = 300
+pressure_tol_bar = 100.0      # 0.01 GPa
+max_force_au     = 4.5E-4     # Ha/Bohr (CP2K default, 0.023 eV/A)
+ranks            = 112        # MPI ranks per level (one exclusive DCGP node)
+time_limit       = "24:00:00" # a level killed at the limit continues from bench-1.restart on resubmission
+
+# Each level changes one thing relative to a neighbour, so the cause of the volume error can be read off:
+#   basis (BSSE): 1 -> 2 -> 3;  D3 damping: 3 -> 4;  three-body C9: 4 -> 5, 7 -> 8;  functional: 4 / 6 / 7;
+#   basis for PBE-D3(BJ): 6 <-> 10;  non-D3 dispersion: 9.
+# c9 = true writes CALCULATE_C9_TERM T; absent/false writes nothing (CP2K default F = the r0 label deck).
+[[bench.levels]]
+name = "01_blyp_d3_dzvpsr"
+description = "CONTROL = r0 label level (BLYP-D3(zero), DZVP-MOLOPT-SR). EOS predicts ~377 A^3/molecule"
+functional = "BLYP"
+dispersion = "D3"
+basis = "DZVP-MOLOPT-SR-GTH"
+[[bench.levels]]
+name = "02_blyp_d3_dzvp"
+description = "BLYP-D3(zero), DZVP-MOLOPT (non-SR, more diffuse)"
+functional = "BLYP"
+dispersion = "D3"
+basis = "DZVP-MOLOPT-GTH"
+[[bench.levels]]
+name = "03_blyp_d3_tzv2p"
+description = "BLYP-D3(zero), TZV2P-MOLOPT: basis-set (BSSE) effect"
+functional = "BLYP"
+dispersion = "D3"
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "04_blyp_d3bj_tzv2p"
+description = "BLYP-D3(BJ), TZV2P-MOLOPT: damping"
+functional = "BLYP"
+dispersion = "D3BJ"
+c9 = false
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "05_blyp_d3bj_c9_tzv2p"
+description = "BLYP-D3(BJ)+C9 (Axilrod-Teller-Muto three-body), TZV2P-MOLOPT"
+functional = "BLYP"
+dispersion = "D3BJ"
+c9 = true
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "06_pbe_d3bj_tzv2p"
+description = "PBE-D3(BJ), TZV2P-MOLOPT"
+functional = "PBE"
+dispersion = "D3BJ"
+c9 = false
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "07_revpbe_d3bj_tzv2p"
+description = "revPBE-D3(BJ), TZV2P-MOLOPT"
+functional = "revPBE"
+dispersion = "D3BJ"
+c9 = false
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "08_revpbe_d3bj_c9_tzv2p"
+description = "revPBE-D3(BJ)+C9, TZV2P-MOLOPT"
+functional = "revPBE"
+dispersion = "D3BJ"
+c9 = true
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "09_rvv10_tzv2p"
+description = "rVV10 (rPW86-PBE + non-local VV10), TZV2P-MOLOPT. Needs libxc; may not run in 2024.1"
+functional = "rVV10"
+dispersion = "none"
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "10_pbe_d3bj_dzvpsr"
+description = "PBE-D3(BJ), DZVP-MOLOPT-SR: cheap counterpart of 06"
+functional = "PBE"
+dispersion = "D3BJ"
+c9 = false
+basis = "DZVP-MOLOPT-SR-GTH"
+
+[[bench.levels]]
+name = "11_pbe_d3bj_c9_tzv2p"
+description = "PBE-D3(BJ)+C9, TZV2P-MOLOPT (added after r1 interim: PBE-D3(BJ) least dense, C9 adds ~+1 %)"
+functional = "PBE"
+dispersion = "D3BJ"
+c9 = true
+basis = "TZV2P-MOLOPT-GTH"
+[[bench.levels]]
+name = "12_pbe_d3bj_c9_dzvpsr"
+description = "PBE-D3(BJ)+C9, DZVP-MOLOPT-SR: cheap counterpart of 11 (label cost)"
+functional = "PBE"
+dispersion = "D3BJ"
+c9 = true
+basis = "DZVP-MOLOPT-SR-GTH"
+
+[experiment]
+V_per_molecule_80K  = 400.9    # cooling curve (volume_vs_temperature_ONCOOLING.png), phase III region
+V_per_molecule_298K = 430.0    # 298k.cif, Z = 2
+cell_298            = [8.2340, 10.1638, 11.8166, 66.646, 83.975, 71.361]
