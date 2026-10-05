@@ -18,7 +18,7 @@ max_force_au     = 4.5E-4     # Ha/Bohr (CP2K default, 0.023 eV/A)
 ranks            = 72         # the three Vermont nodes together (Will, 2026-10-05)
 hosts            = "bhx0123:24,bhx0124:24,bhx0125:24"     # mpirun starts on bhx0123, ssh to the others
 mpi_prefix       = "/home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5"
-mpi_extra        = ""         # e.g. "--mca btl_tcp_if_include ib0" after bluehive/multinode.sh check
+mpi_extra        = "--mca btl_tcp_if_include 192.168.18.0/24 --mca oob_tcp_if_include 192.168.18.0/24"   # 10 GbE, no IB (multinode check)
 time_limit       = "30-00:00:00"  # ignored on Vermont (no Slurm) # a level killed at the limit continues from bench-1.restart on resubmission
 
 # Each level changes one thing relative to a neighbour, so the cause of the volume error can be read off:

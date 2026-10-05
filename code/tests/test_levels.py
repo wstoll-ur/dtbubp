@@ -55,4 +55,4 @@ def test_mpirun_launcher():
 
 def test_multinode_launcher():
     d = {"launcher": "mpirun", "hosts": "a:24,b:24", "mpi_prefix": "/x/ompi"}
-    assert cp2k.launch(d, 48, cpus="0-47") == "mpirun --prefix /x/ompi -np 48 --host a:24,b:24 --map-by core --bind-to core cp2k.psmp"
+    assert cp2k.launch(d, 48, cpus="0-47") == "mpirun --prefix /x/ompi -np 48 --host a:24,b:24 --map-by core --bind-to core -x PATH -x LD_LIBRARY_PATH -x OMP_NUM_THREADS cp2k.psmp"

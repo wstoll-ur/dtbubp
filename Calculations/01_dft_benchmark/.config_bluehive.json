@@ -1,5 +1,5 @@
 {
- "toml_sha256": "6c9f783d9b7fa553f506a82ead0478e7739530fe7966486ca3c3e2b2f7c4d5d8",
+ "toml_sha256": "b7b14af7d260dd3883c75c99eba7d826f60ac5d7bd35abace6294d8bb02daf20",
  "cfg": {
   "paths": {
    "code_dir": "../../code",
@@ -14,7 +14,7 @@
    "ranks": 72,
    "hosts": "bhx0123:24,bhx0124:24,bhx0125:24",
    "mpi_prefix": "/home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5",
-   "mpi_extra": "",
+   "mpi_extra": "--mca btl_tcp_if_include 192.168.18.0/24 --mca oob_tcp_if_include 192.168.18.0/24",
    "time_limit": "30-00:00:00",
    "levels": [
     {
