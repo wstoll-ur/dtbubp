@@ -1,45 +1,42 @@
-wget  --quiet https://www.cp2k.org/static/downloads/COSMA-v2.6.6.tar.gz
-COSMA-v2.6.6.tar.gz: OK
-Checksum of COSMA-v2.6.6.tar.gz Ok
-wget  --quiet https://www.cp2k.org/static/downloads/COSTA-v2.2.2.tar.gz
-COSTA-v2.2.2.tar.gz: OK
-Checksum of COSTA-v2.2.2.tar.gz Ok
-wget  --quiet https://www.cp2k.org/static/downloads/Tiled-MM-v2.2.tar.gz
-Tiled-MM-v2.2.tar.gz: OK
-Checksum of Tiled-MM-v2.2.tar.gz Ok
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/COSMA-2.6.6
-Step cosma took 27.00 seconds.
-==================== Installing ELPA ====================
-wget  --quiet https://www.cp2k.org/static/downloads/elpa-2023.05.001.tar.gz
-elpa-2023.05.001.tar.gz: OK
-Checksum of elpa-2023.05.001.tar.gz Ok
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/elpa-2023.05.001/cpu
-/usr/bin/env: python3: No such file or directory
-Step elpa took 76.00 seconds.
+Step openmpi took 0.00 seconds.
+==================== Installing OpenBLAS ====================
+openblas-0.3.25 is already installed, skipping it.
+Step openblas took 0.00 seconds.
+==================== Installing FFTW ====================
+fftw-3.3.10 is already installed, skipping it.
+Step fftw took 0.00 seconds.
+==================== Installing LIBINT ====================
+libint-2.6.0 is already installed, skipping it.
+Step libint took 0.00 seconds.
+==================== Installing LIBXC ====================
+libxc-6.2.2 is already installed, skipping it.
+Step libxc took 0.00 seconds.
+Step libgrpp took 0.00 seconds.
+==================== Installing Libxsmm ====================
+libxsmm-1.17 is already installed, skipping it.
+Step libxsmm took 0.00 seconds.
+==================== Installing ScaLAPACK ====================
+scalapack-2.2.1 is already installed, skipping it.
+Step scalapack took 0.00 seconds.
+Step cosma took 0.00 seconds.
+Step elpa took 0.00 seconds.
 Step ptscotch took 0.00 seconds.
 Step superlu took 0.00 seconds.
 Step pexsi took 0.00 seconds.
 Step quip took 0.00 seconds.
-==================== Installing gsl ====================
-wget  --quiet https://www.cp2k.org/static/downloads/gsl-2.7.tar.gz
-gsl-2.7.tar.gz: OK
-Checksum of gsl-2.7.tar.gz Ok
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/gsl-2.7
-Step gsl took 62.00 seconds.
+Step gsl took 0.00 seconds.
 Step plumed took 0.00 seconds.
-==================== Installing hdf5 ====================
-wget  --quiet https://www.cp2k.org/static/downloads/hdf5-1.14.2.tar.bz2
-hdf5-1.14.2.tar.bz2: OK
-Checksum of hdf5-1.14.2.tar.bz2 Ok
-Installing from scratch into /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/hdf5-1.14.2
-tar (child): lbzip2: Cannot exec: No such file or directory
-tar (child): Error is not recoverable: exiting now
-tar: Child returned status 2
-tar: Error is not recoverable: exiting now
-ERROR: (./scripts/stage7/install_hdf5.sh, line 38) Non-zero exit code detected.
+Step hdf5 took 0.00 seconds.
+Step libvdwxc took 0.00 seconds.
+Step spglib took 0.00 seconds.
+Step libvori took 0.00 seconds.
+Step libtorch took 0.00 seconds.
+Step spfft took 0.00 seconds.
+Step spla took 0.00 seconds.
+Step sirius took 0.00 seconds.
+==================== generating arch files ====================
+arch files can be found in the /home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/arch subdirectory
+/usr/bin/env: python3: No such file or directory
 TOOLCHAIN FAILED
 
-tar (child): Error is not recoverable: exiting now
-tar: Error is not recoverable: exiting now
-ERROR: (./scripts/stage7/install_hdf5.sh, line 38) Non-zero exit code detected.
 TOOLCHAIN FAILED
