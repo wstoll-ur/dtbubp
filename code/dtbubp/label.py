@@ -43,21 +43,37 @@ def _pool_body(c: Campaign, workdir: Path, list_file: str) -> str:
     mem = int(d["mem_per_node_gb"]) // k
     tmo = int(d["frame_timeout_min"])
     if d.get("launcher", "srun") in ("apptainer", "mpirun"):
+        chain = bool(d.get("wfn_chain", False))
+        # DTB_LANES / DTB_RANKS (environment at launch) override the packing on one node, e.g. a node that
+        # another user's job partly occupies (bhx0123): DTB_LANES=1 DTB_RANKS=16
         return _env(c) + f"""
 export OMP_NUM_THREADS=1
 cd {workdir}
-echo "node $(hostname), $(nproc) cores, {k} lanes x {ranks} ranks, started $(date)"
+K=${{DTB_LANES:-{k}}}; R=${{DTB_RANKS:-{ranks}}}
+echo "node $(hostname), $(nproc) cores, $K lanes x $R ranks, wfn chaining {'on' if chain else 'off'}, started $(date)"
 lane() {{
-  local i=$1 lo=$(( $1 * {ranks} )) hi=$(( $1 * {ranks} + {ranks} - 1 )) n=0 f
+  local i=$1 lo=$(( $1 * R )) hi=$(( $1 * R + R - 1 )) n=0 f prev=""
   for f in $(cat {list_file}); do
-    n=$((n + 1)); [ $(( (n - 1) % {k} )) -eq $i ] || continue
+    n=$((n + 1)); [ $(( (n - 1) % K )) -eq $i ] || continue
     grep -q "PROGRAM ENDED" $f/output.out 2>/dev/null && continue
-    ( cd $f && timeout {tmo}m {cp2k.launch(d, ranks, cpus="$lo-$hi")} \\
-          -i input.inp -o output.out > run.log 2>&1 \\
+    inp=input.inp
+    if {'true' if chain else 'false'}; then
+      # start from the previous frame's converged wavefunction (same atoms and basis, nearby geometry);
+      # no previous one (first frame of a lane, or it failed) -> atomic guess
+      if [ -n "$prev" ] && [ -s "$prev" ]; then cp "$prev" $f/guess.wfn
+      else sed 's/SCF_GUESS  RESTART/SCF_GUESS  ATOMIC/' $f/input.inp > $f/input_atomic.inp; inp=input_atomic.inp; fi
+    fi
+    ( cd $f && timeout {tmo}m {cp2k.launch(d, "$R", cpus="$lo-$hi")} \\
+          -i $inp -o output.out > run.log 2>&1 < /dev/null \\
       || echo "$f: CP2K failed or timed out (see $f/output.out, $f/run.log)" )
+    rm -f $f/guess.wfn
+    if grep -q "PROGRAM ENDED" $f/output.out 2>/dev/null && [ -s $f/label-RESTART.wfn ]; then
+      [ -n "$prev" ] && rm -f "$prev"          # keep only the newest wavefunction per lane
+      prev=$f/label-RESTART.wfn
+    fi
   done
 }}
-for i in $(seq 0 {k - 1}); do lane $i & sleep 2; done
+for i in $(seq 0 $((K - 1))); do lane $i & sleep 2; done
 wait
 echo "all frames of {list_file} attempted $(date)"
 """
@@ -89,7 +105,7 @@ def smoketest(c: Campaign, check: bool = False, dry: bool = False):
       debug_polar      RUN_TYPE DEBUG: analytical vs finite-field polarizability (< 2 %)
     """
     d = c.root / "smoketest"
-    kinds = ("label", "stress_numerical", "debug_polar")
+    kinds = ("label", "stress_numerical") + (("debug_polar",) if c.cfg["dft"].get("polarizability", True) else ())
     if check:
         return smoketest_check(c, d)
     fr = min((f for f in _frames(c) if f["info"]["config_type"] == "fixdeform"),
@@ -112,7 +128,9 @@ def smoketest_check(c: Campaign, d: Path) -> bool:
     rep = {}
     lab = cp2k.parse_output(d / "label" / "output.out")
     rep["label_ended"] = lab["ended"]
-    for q in ("energy", "forces", "stress", "dipole_debye", "polar_au"):
+    want = ["energy", "forces", "stress"] + (["dipole_debye"] if c.cfg["dft"].get("dipole", True) else []) \
+        + (["polar_au"] if c.cfg["dft"].get("polarizability", True) else [])
+    for q in want:
         have = lab[q] is not None
         rep[f"has_{q}"] = have
         ok &= have
@@ -130,7 +148,9 @@ def smoketest_check(c: Campaign, d: Path) -> bool:
         rep["stress_comparison"] = "not available yet"
         ok = False
     dbg = cp2k.parse_debug_polar(d / "debug_polar" / "output.out")
-    if dbg is not None:
+    if not c.cfg["dft"].get("polarizability", True):
+        rep["polar_debug"] = "skipped (polarizability = false)"
+    elif dbg is not None:
         big = np.abs(dbg[:, 1]) > 1.0
         rel = np.abs(dbg[:, 0] - dbg[:, 1])[big] / np.abs(dbg[:, 1])[big] * 100
         rep["polar_max_rel_err_pct"] = round(float(rel.max()), 3) if rel.size else None
@@ -172,8 +192,18 @@ def setup(c: Campaign, dry: bool = False, only_split: str | None = None):
         names.append(fid)
     todo = [n for n in names if not _done(lab / n)]
     nch = int(c.cfg["dft"]["chunks"])
+    if c.cfg["dft"].get("wfn_chain", False):
+        # contiguous blocks in trajectory order: consecutive frames of a lane are close in time / T, so the
+        # previous wavefunction is a good guess (lanes take every K-th frame of their chunk)
+        order = {fr["info"]["frame_id"]: (fr["info"].get("config_type", ""), fr["info"].get("time_ns", 0.0))
+                 for fr in frames}
+        todo.sort(key=lambda n: order[n])
+        bounds = [round(i * len(todo) / nch) for i in range(nch + 1)]
+        blocks = [todo[bounds[k]:bounds[k + 1]] for k in range(nch)]
+    else:
+        blocks = [todo[k::nch] for k in range(nch)]
     for k in range(nch):
-        (lab / f"chunk_{k}.txt").write_text("\n".join(todo[k::nch]) + "\n")
+        (lab / f"chunk_{k}.txt").write_text("\n".join(blocks[k]) + "\n")
     body = _pool_body(c, lab, "chunk_${SLURM_ARRAY_TASK_ID}.txt")
     sc = write_script(c.cfg["slurm"]["cpu"], lab / "label_job.sh", "dtb_label", body,
                       c.cfg["dft"]["time_limit"], lab, array=f"0-{nch - 1}")

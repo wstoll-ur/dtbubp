@@ -99,7 +99,11 @@ def xc_grid(dft: dict) -> str:
 
 
 def make_input(dft: dict, cell: np.ndarray, kind: str = "label") -> str:
-    """kind = label (E, F, analytical stress, dipole, polarizability)
+    """[dft] switches: dipole (default true: Berry-phase MOMENTS, ~free), polarizability (default true:
+    LINRES/POLAR, several SCFs' worth), wfn_chain (default false: SCF_GUESS RESTART from guess.wfn, which the
+    lane script copies from the previous frame; the frame's own wavefunction is written as label-RESTART.wfn).
+
+    kind = label (E, F, analytical stress, dipole, polarizability)
             | stress_numerical (E, F, numerical stress only; smoke test)
             | debug_polar (RUN_TYPE DEBUG: analytical vs finite-field polarizability; smoke test)
     """
@@ -113,6 +117,15 @@ def make_input(dft: dict, cell: np.ndarray, kind: str = "label") -> str:
         f"      MAX_ITER        {lr['max_iter']}\n"
         "      &POLAR\n        DO_RAMAN                  T\n        PERIODIC_DIPOLE_OPERATOR  T\n"
         "      &END POLAR\n    &END LINRES\n  &END PROPERTIES")
+    if not dft.get("dipole", True):
+        moments = ""
+    if not dft.get("polarizability", True):
+        properties = ""
+    chain = bool(dft.get("wfn_chain", False))
+    scf_guess = "RESTART" if chain else "ATOMIC"
+    wfn_file = "    WFN_RESTART_FILE_NAME  guess.wfn\n" if chain else ""
+    restart_print = ("        &RESTART ON\n          BACKUP_COPIES 0\n        &END RESTART" if chain else
+                     "        &RESTART OFF\n        &END RESTART")
     debug, efield, run_type, stress = "", "", "ENERGY_FORCE", "ANALYTICAL"
     if kind == "stress_numerical":
         moments, properties, stress = "", "", "NUMERICAL"
@@ -131,7 +144,8 @@ def make_input(dft: dict, cell: np.ndarray, kind: str = "label") -> str:
                 MAX_SCF=dft["max_scf"], EPS_SCF=dft["eps_scf"], XC_GRID=xc_grid(dft), MOMENTS=moments,
                 PROPERTIES=properties, CELL=cell_block(cell), LEVEL=level_name(lv),
                 XC_FUNCTIONAL=xc_functional(lv["functional"]), VDW=vdw(lv), BASIS=lv["basis"],
-                PSEUDO=PSEUDO[lv["functional"]])
+                PSEUDO=PSEUDO[lv["functional"]], SCF_GUESS=scf_guess, WFN_FILE=wfn_file,
+                RESTART_PRINT=restart_print)
 
 
 # ============================================================================ output parsing

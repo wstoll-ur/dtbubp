@@ -1,6 +1,7 @@
 ! DtBuBP DFT label: energy, forces, stress tensor, Berry-phase dipole and periodic polarizability
 ! in ONE run. Level of theory: {{LEVEL}}
-! (r0 = the 9MA level BLYP-D3/DZVP-MOLOPT-SR-GTH/GTH-BLYP, 600/60 Ry, NN10 smoothing) + LINRES/POLAR + MOMENTS.
+! (r0 = the 9MA level BLYP-D3/DZVP-MOLOPT-SR-GTH/GTH-BLYP, 600/60 Ry, NN10 smoothing); dipole (MOMENTS) and
+! polarizability (LINRES) only if switched on in [dft].
 ! Written by dtbubp; do not edit by hand.
 &GLOBAL
   PROJECT label
@@ -20,7 +21,7 @@
   &DFT
     BASIS_SET_FILE_NAME  BASIS_MOLOPT
     POTENTIAL_FILE_NAME  POTENTIAL
-    &MGRID
+{{WFN_FILE}}    &MGRID
       CUTOFF      {{CUTOFF}}
       REL_CUTOFF  {{REL_CUTOFF}}
       NGRIDS      5
@@ -30,7 +31,7 @@
     &END QS
 {{EFIELD}}
     &SCF
-      SCF_GUESS  ATOMIC
+      SCF_GUESS  {{SCF_GUESS}}
       MAX_SCF    {{MAX_SCF}}
       EPS_SCF    {{EPS_SCF}}
       &OT
@@ -42,8 +43,7 @@
         EPS_SCF  {{EPS_SCF}}
       &END OUTER_SCF
       &PRINT
-        &RESTART OFF
-        &END RESTART
+{{RESTART_PRINT}}
       &END PRINT
     &END SCF
     &XC

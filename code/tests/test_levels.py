@@ -44,7 +44,8 @@ def test_apptainer_launcher_and_lanes(tmp_path):
         cfg = {"dft": dict(d, frames_per_node=2, cores_per_node=56, mem_per_node_gb=400, frame_timeout_min=60),
                "env": {"dft": "module load apptainer"}}
     b = _pool_body(C(), tmp_path, "chunk_0.txt")
-    assert "--cpu-set $lo-$hi" in b and "lo=$(( $1 * 28 ))" in b and "seq 0 1" in b and "srun" not in b
+    assert "--cpu-set $lo-$hi" in b and "lo=$(( $1 * R ))" in b and "K=${DTB_LANES:-2}; R=${DTB_RANKS:-28}" in b
+    assert "srun" not in b and "-np $R" in b
 
 
 def test_mpirun_launcher():
@@ -56,3 +57,22 @@ def test_mpirun_launcher():
 def test_multinode_launcher():
     d = {"launcher": "mpirun", "hosts": "a:24,b:24", "mpi_prefix": "/x/ompi"}
     assert cp2k.launch(d, 48, cpus="0-47") == "mpirun --prefix /x/ompi -np 48 --host a:24,b:24 --map-by core --bind-to core -x PATH -x LD_LIBRARY_PATH -x OMP_NUM_THREADS cp2k.psmp"
+
+
+def test_efs_only_deck_with_wfn_chain(tmp_path):
+    d = dict(DFT, functional="PBE", dispersion="D3BJ", c9=True, dipole=True, polarizability=False, wfn_chain=True)
+    t = cp2k.make_input(d, CELL)
+    assert "&LINRES" not in t and "&MOMENTS" in t and "CALCULATE_C9_TERM     T" in t
+    assert "SCF_GUESS  RESTART" in t and "WFN_RESTART_FILE_NAME  guess.wfn" in t and "&RESTART ON" in t
+    t0 = cp2k.make_input(dict(DFT, dipole=False, polarizability=False), CELL)
+    assert "&MOMENTS" not in t0 and "&LINRES" not in t0 and "SCF_GUESS  ATOMIC" in t0 and "&RESTART OFF" in t0
+    from dtbubp.label import _pool_body
+
+    class C:
+        cfg = {"dft": dict(d, launcher="mpirun", frames_per_node=2, cores_per_node=24, mem_per_node_gb=60,
+                           frame_timeout_min=60), "env": {"dft": "true"}}
+    b = _pool_body(C(), tmp_path, "chunk_0.txt")
+    assert "if true; then" in b and "cp \"$prev\" $f/guess.wfn" in b and "input_atomic.inp" in b
+    (tmp_path / "pool.sh").write_text(b)
+    import subprocess
+    assert subprocess.run(["bash", "-n", str(tmp_path / "pool.sh")]).returncode == 0

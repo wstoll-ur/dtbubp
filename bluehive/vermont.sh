@@ -2,7 +2,7 @@
 # Run dtbubp job scripts on the BlueHive Vermont nodes (no Slurm, NO shared file system with bluehive3).
 # Like vermont_crystal.sh: copy the job folder to the node, start it with nohup over ssh, copy results back.
 #
-#   bash bluehive/vermont.sh run  <job_script.sh> <node>[,node2,...] [task_id]  # copy job folder -> node(s), start on the first
+#   bash bluehive/vermont.sh run  <job_script.sh> <node>[,node2,...] [task_id] [VAR=val ...]  # copy job folder -> node(s), start on the first
 #   bash bluehive/vermont.sh pull [tag]                              # copy outputs back (all runs, or one)
 #   bash bluehive/vermont.sh watch [minutes]                         # pull every N min (default 30) until nothing runs
 #   bash bluehive/vermont.sh status                                  # running/finished + load per node
@@ -33,6 +33,7 @@ run)
   # <node> may be a comma list (multi-node MPI run): the folder is copied to every node (no shared file
   # system; OpenMPI needs the working directory everywhere), the job starts on the first, results live there.
   script=$(realpath "$1"); nodes=$(echo $2 | tr ',' ' '); h=$(echo $nodes | awk '{print $1}'); task=${3:-0}
+  shift 3 2>/dev/null || shift $#; envs="$*"     # optional VAR=value ... (e.g. DTB_LANES=1 DTB_RANKS=16)
   ldir=$(dirname "$script"); rdir=$(remote_of "$ldir"); name=$(basename "$script" .sh)
   tag=${name}_${h}_t${task}_$(date +%m%d_%H%M%S)
   for n in $nodes; do
@@ -43,7 +44,7 @@ run)
       | $SSH $n "cat > $rdir/$name.vermont.sh"
   done
   log=$rdir/${name}_vermont_t$task.log
-  pid=$($SSH $h "cd $rdir && SLURM_ARRAY_TASK_ID=$task SLURM_JOB_ID=$tag setsid nohup bash -l $name.vermont.sh > $log 2>&1 < /dev/null & echo \$!")
+  pid=$($SSH $h "cd $rdir && SLURM_ARRAY_TASK_ID=$task SLURM_JOB_ID=$tag $envs setsid nohup bash -l $name.vermont.sh > $log 2>&1 < /dev/null & echo \$!")
   echo "$h $pid $name task=$task $ldir $rdir" > $REG/$tag.txt
   echo "started $tag: $h pid $pid, node dir $rdir, log $log"
   ;;
