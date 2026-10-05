@@ -36,7 +36,7 @@ if [ "$MODE" = timing ]; then
     cd $T/all && $MP -np $((24*N)) --host $H24 cp2k.psmp -i input.inp -o output.out > run.log 2>&1 < /dev/null'" < /dev/null
   for d in one all; do
     echo "== $d"
-    $SSH $H "cd $T/$d; grep -E 'Total number of message passing|SCF run converged in|ENERGY\\| Total|Analytical stress|PROGRAM ENDED|^ CP2K +1 |ABORT' output.out; tail -3 run.log" < /dev/null
+    $SSH $H "cd $T/$d; grep -E 'Total number of message passing|SCF run converged in|Total FORCE_EVAL|Analytical stress|PROGRAM ENDED|^ CP2K +1 |ABORT' output.out; tail -3 run.log" < /dev/null
   done
   } > $OUT 2>&1
   cat $OUT
@@ -59,7 +59,7 @@ for h in $NODES; do $SSH $h "mkdir -p /home/$USER/dtbubp_test/multi" < /dev/null
 $SSH $H "bash -l -c 'source /home/$USER/Claude/cp2k-2024.1.env; export OMP_NUM_THREADS=1; cd /home/$USER/dtbubp_test/multi && \
          time timeout 600 mpirun --prefix $OMPI -np 12 --host $HL --map-by core --bind-to core -x PATH -x LD_LIBRARY_PATH -x OMP_NUM_THREADS \
          --mca btl_tcp_if_include 192.168.18.0/24 --mca oob_tcp_if_include 192.168.18.0/24 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 < /dev/null'; \
-         cd /home/$USER/dtbubp_test/multi; grep -E 'Total number of message passing|ENERGY\\| Total|PROGRAM ENDED|^ CP2K +1 ' ch4.out; echo '-- ABORT section:'; grep -B3 -A10 ABORT ch4.out | head -30; echo '-- end of ch4.out:'; tail -25 ch4.out; echo '-- run.log:'; tail -15 run.log" < /dev/null
+         cd /home/$USER/dtbubp_test/multi; grep -E 'Total number of message passing|Total FORCE_EVAL|PROGRAM ENDED|^ CP2K +1 ' ch4.out; echo '-- ABORT section:'; grep -B3 -A10 ABORT ch4.out | head -30; echo '-- end of ch4.out:'; tail -25 ch4.out; echo '-- run.log:'; tail -15 run.log" < /dev/null
 } > $OUT 2>&1
 cat $OUT
 git add $OUT && git commit -qm "multinode check" && git push -q && echo pushed
