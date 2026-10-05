@@ -1,7 +1,7 @@
 #!/bin/bash
 # Compile CP2K 2024.1 (the version of every Leonardo run) for the Broadwell Vermont nodes (RHEL 7.9, AVX2).
 # Built from source with the CP2K toolchain (GCC + OpenMPI 4.1.5 + OpenBLAS + ScaLAPACK + FFTW + libxc +
-# libint + libxsmm, all built locally) into  /home/$USER/Claude/cp2k-2024.1  on the node's own disk.
+# libint + libxsmm, all built locally; no libgrpp = ECP integrals, not needed with GTH) into  /home/$USER/Claude/cp2k-2024.1  on the node's own disk.
 # Nothing is installed into your existing environments.
 #
 #   bash bluehive/build_cp2k.sh fetch            # bluehive3: download source + toolchain packages (nodes may lack internet)
@@ -22,9 +22,11 @@ case "$cmd" in
 fetch)
   mkdir -p $SRC/pkgs && cd $SRC
   [ -s cp2k-2024.1.tar.bz2 ] || wget -q https://github.com/cp2k/cp2k/releases/download/v2024.1/cp2k-2024.1.tar.bz2
+  # the Vermont nodes have no bzip2: repack as gzip here
+  [ -s cp2k-2024.1.tar.gz ] || { bzip2 -dc cp2k-2024.1.tar.bz2 | gzip -1 > cp2k-2024.1.tar.gz; }
   cd pkgs
   for f in cmake-3.28.1-linux-x86_64.sh openmpi-4.1.5.tar.gz OpenBLAS-0.3.25.tar.gz fftw-3.3.10.tar.gz \
-           libxc-6.2.2.tar.gz libint-v2.6.0-cp2k-lmax-5.tgz libgrpp-main-20231215.zip libxsmm-1.17.tar.gz \
+           libxc-6.2.2.tar.gz libint-v2.6.0-cp2k-lmax-5.tgz libxsmm-1.17.tar.gz \
            scalapack-2.2.1.tgz; do
     [ -s $f ] || wget -q https://www.cp2k.org/static/downloads/$f || echo "FAILED $f"
   done
@@ -32,13 +34,15 @@ fetch)
   ;;
 start)
   H=$1
-  $SSH $H "mkdir -p $DEST" && rsync -a $SRC/ $H:$DEST/downloads/ || exit 1
+  $SSH $H "mkdir -p $DEST" && rsync -a --exclude '*.bz2' $SRC/ $H:$DEST/downloads/ || exit 1
   cat > /tmp/build_cp2k_remote_$USER.sh <<REMOTE
 #!/bin/bash -l
 set -e
 echo "build start \$(date) on \$(hostname), \$(nproc) cores"
 cd $DEST
-[ -d cp2k-2024.1 ] || tar xjf downloads/cp2k-2024.1.tar.bz2
+echo "tools on this node:"; for x in gzip bzip2 unzip make patch perl python3 wget m4 git; do printf "  %-8s %s\\n" \$x "\$(command -v \$x || echo MISSING)"; done
+for x in gzip make patch perl; do command -v \$x >/dev/null || { echo "MISSING required tool \$x"; exit 1; }; done
+[ -d cp2k-2024.1 ] || tar xzf downloads/cp2k-2024.1.tar.gz
 cd cp2k-2024.1/tools/toolchain
 mkdir -p build && cp -n $DEST/downloads/pkgs/* build/
 module purge
@@ -48,8 +52,10 @@ G=\$(module avail gcc 2>&1 | grep -o "gcc/1[23][^ ]*" | sort -V | tail -1)
 [ -n "\$G" ] || G=\$(module avail gcc 2>&1 | grep -o "gcc/11[^ ]*" | sort -V | tail -1)
 [ -n "\$G" ] || G=gcc/14.2.0/b1
 module load \$G; echo "using \$G: \$(gcc --version | head -1)"
+command -v python3 >/dev/null || module load python3/3.7.1   # CP2K make needs python3 (fypp)
+echo "python3: \$(command -v python3)"
 ./install_cp2k_toolchain.sh -j \$(nproc) --target-cpu=haswell --mpi-mode=openmpi --with-gcc=system \\
-    --with-openmpi=install --with-openblas=install --with-cmake=install
+    --with-openmpi=install --with-openblas=install --with-cmake=install --with-libgrpp=no
 cp install/arch/local.psmp ../../arch/
 source install/setup
 cd ../..
