@@ -77,6 +77,8 @@ def setup(c: Campaign, dry: bool = False, only=None) -> Path:
         names.append(lv["name"])
     (root / "levels.txt").write_text("\n".join(names) + "\n")
     ranks = int(b.get("ranks", dft["cores_per_node"]))
+    if b.get("hosts"):                       # multi-node run (BlueHive: the three Vermont nodes together)
+        dft = dict(dft, hosts=b["hosts"], mpi_prefix=b.get("mpi_prefix", ""), mpi_extra=b.get("mpi_extra", ""))
     body = dc.cfg["env"]["dft"].strip() + f"""
 export OMP_NUM_THREADS=1
 cd {root}

@@ -51,3 +51,8 @@ def test_mpirun_launcher():
     assert cp2k.launch({"launcher": "mpirun"}, 12, cpus="12-23") == "mpirun -np 12 --bind-to core --cpu-set 12-23 cp2k.psmp"
     d = {"launcher": "mpirun", "cp2k_exe": "cp2k.popt", "mpi_pin": "-genv I_MPI_PIN_PROCESSOR_LIST {cpus}"}
     assert cp2k.launch(d, 24, cpus="0-23") == "mpirun -np 24 -genv I_MPI_PIN_PROCESSOR_LIST 0-23 cp2k.popt"
+
+
+def test_multinode_launcher():
+    d = {"launcher": "mpirun", "hosts": "a:24,b:24", "mpi_prefix": "/x/ompi"}
+    assert cp2k.launch(d, 48, cpus="0-47") == "mpirun --prefix /x/ompi -np 48 --host a:24,b:24 --map-by core --bind-to core cp2k.psmp"

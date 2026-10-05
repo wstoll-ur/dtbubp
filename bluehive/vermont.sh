@@ -2,7 +2,7 @@
 # Run dtbubp job scripts on the BlueHive Vermont nodes (no Slurm, NO shared file system with bluehive3).
 # Like vermont_crystal.sh: copy the job folder to the node, start it with nohup over ssh, copy results back.
 #
-#   bash bluehive/vermont.sh run  <job_script.sh> <node> [task_id]  # copy job folder -> node, start (task_id -> SLURM_ARRAY_TASK_ID)
+#   bash bluehive/vermont.sh run  <job_script.sh> <node>[,node2,...] [task_id]  # copy job folder -> node(s), start on the first
 #   bash bluehive/vermont.sh pull [tag]                              # copy outputs back (all runs, or one)
 #   bash bluehive/vermont.sh watch [minutes]                         # pull every N min (default 30) until nothing runs
 #   bash bluehive/vermont.sh status                                  # running/finished + load per node
@@ -30,13 +30,18 @@ pull_one() {   # $1 = registry file
 
 case "$cmd" in
 run)
-  script=$(realpath "$1"); h=$2; task=${3:-0}
+  # <node> may be a comma list (multi-node MPI run): the folder is copied to every node (no shared file
+  # system; OpenMPI needs the working directory everywhere), the job starts on the first, results live there.
+  script=$(realpath "$1"); nodes=$(echo $2 | tr ',' ' '); h=$(echo $nodes | awk '{print $1}'); task=${3:-0}
   ldir=$(dirname "$script"); rdir=$(remote_of "$ldir"); name=$(basename "$script" .sh)
   tag=${name}_${h}_t${task}_$(date +%m%d_%H%M%S)
-  $SSH $h "mkdir -p $rdir" || exit 1
-  # inputs (and any finished outputs, so finished frames are skipped); job script with node-local paths
-  rsync -a --exclude '*_vermont_*.log' -e "$SSH" $ldir/ $h:$rdir/ || exit 1
-  sed -e "s#$REPO#$RROOT#g" -e "s#/scratch/$USER/DtBuDp/DtBuDp#$RROOT#g" $script | $SSH $h "cat > $rdir/$name.vermont.sh"
+  for n in $nodes; do
+    $SSH $n "mkdir -p $rdir" || exit 1
+    # inputs (and any finished outputs, so finished frames are skipped); job script with node-local paths
+    rsync -a --exclude '*_vermont_*.log' -e "$SSH" $ldir/ $n:$rdir/ || exit 1
+    sed -e "s#$REPO#$RROOT#g" -e "s#/scratch/$USER/DtBuDp/DtBuDp#$RROOT#g" -e "s#/gpfs/fs2$RROOT#$RROOT#g" $script \
+      | $SSH $n "cat > $rdir/$name.vermont.sh"
+  done
   log=$rdir/${name}_vermont_t$task.log
   pid=$($SSH $h "cd $rdir && SLURM_ARRAY_TASK_ID=$task SLURM_JOB_ID=$tag setsid nohup bash -l $name.vermont.sh > $log 2>&1 < /dev/null & echo \$!")
   echo "$h $pid $name task=$task $ldir $rdir" > $REG/$tag.txt
