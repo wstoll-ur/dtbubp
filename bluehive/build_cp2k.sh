@@ -7,6 +7,7 @@
 #   bash bluehive/build_cp2k.sh fetch            # bluehive3: download source + toolchain packages (nodes may lack internet)
 #   bash bluehive/build_cp2k.sh start bhx0123    # copy to the node, start the build there (nohup, ~2-3 h)
 #   bash bluehive/build_cp2k.sh log   bhx0123    # tail the build log (and push it to the repo)
+#   bash bluehive/build_cp2k.sh test bhx0123     # methane test on the build node, nothing copied
 #   bash bluehive/build_cp2k.sh deploy bhx0123 "bhx0124 bhx0125"   # copy the finished build to the other nodes + methane test on all
 set -u
 cd "$(git rev-parse --show-toplevel)" || exit 1
@@ -93,6 +94,26 @@ log)
   $SSH $H "tail -n 40 $DEST/build.log; echo; ls $CP2K/exe/local 2>/dev/null; grep -h -iE 'error|failed' $DEST/build.log | tail -15" > $R/build_cp2k_log.txt 2>&1
   cat $R/build_cp2k_log.txt
   git add $R/build_cp2k_log.txt && git commit -qm "CP2K build log ($H)" && git push -q && echo pushed
+  ;;
+test)
+  # methane PBE-D3(BJ)/TZV2P on one node: two concurrent 4-rank runs on disjoint cores (the label packing),
+  # plus a 1-rank run to check the serial path. No copying. Usage: bash bluehive/build_cp2k.sh test bhx0123
+  H=$1; OUT=$R/build_cp2k_test_$H.txt
+  $SSH $H "mkdir -p /home/$USER/dtbubp_test" && scp -q bluehive/cp2k_test/ch4.inp $H:/home/$USER/dtbubp_test/
+  $SSH $H bash -l -s > $OUT 2>&1 <<TEST
+echo "# CP2K test on \$(hostname) \$(date -Is)"
+source $DEST/cp2k-2024.1.env; export OMP_NUM_THREADS=1
+echo "cp2k: \$(which cp2k.psmp)  mpirun: \$(which mpirun)"; ldd \$(which cp2k.psmp) | grep "not found"
+cd /home/$USER/dtbubp_test
+for i in 0 1 s; do rm -rf trun\$i; mkdir -p trun\$i && cp ch4.inp trun\$i/; done
+( cd trun0 && mpirun -np 4 --bind-to core --cpu-set 0-3 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
+( cd trun1 && mpirun -np 4 --bind-to core --cpu-set 4-7 cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 ) &
+wait
+( cd truns && cp2k.psmp -i ch4.inp -o ch4.out > run.log 2>&1 )
+for i in 0 1 s; do echo "== trun\$i"; grep -E "CP2K\| version string|Data directory path|Total number of message passing|ENERGY\| Total|PROGRAM ENDED|ABORT|CP2K +1 " trun\$i/ch4.out; grep -A4 "STRESS| Analytical stress tensor" trun\$i/ch4.out | head -5; tail -3 trun\$i/run.log; done
+TEST
+  cat $OUT
+  git add $OUT && git commit -qm "CP2K build test on $H" && git push -q && echo pushed
   ;;
 deploy)
   H=$1; OTHERS=$2
