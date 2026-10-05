@@ -37,15 +37,15 @@ start)
   $SSH $H "mkdir -p $DEST" && rsync -a --exclude '*.bz2' $SRC/ $H:$DEST/downloads/ || exit 1
   cat > /tmp/build_cp2k_remote_$USER.sh <<REMOTE
 #!/bin/bash -l
-set -e
+# no set -e: the node's module function returns non-zero on harmless warnings (unalias sudo)
 echo "build start \$(date) on \$(hostname), \$(nproc) cores"
 cd $DEST
 echo "tools on this node:"; for x in gzip bzip2 unzip make patch perl python3 wget m4 git; do printf "  %-8s %s\\n" \$x "\$(command -v \$x || echo MISSING)"; done
 for x in gzip make patch perl; do command -v \$x >/dev/null || { echo "MISSING required tool \$x"; exit 1; }; done
-[ -d cp2k-2024.1 ] || tar xzf downloads/cp2k-2024.1.tar.gz
-cd cp2k-2024.1/tools/toolchain
+[ -d cp2k-2024.1 ] || tar xzf downloads/cp2k-2024.1.tar.gz || { echo 'untar failed'; exit 1; }
+cd cp2k-2024.1/tools/toolchain || exit 1
 mkdir -p build && cp -n $DEST/downloads/pkgs/* build/
-module purge
+module purge || true
 echo "gcc modules:"; module avail gcc 2>&1 | grep -o "gcc/[0-9][^ ]*" | sort -u
 # prefer GCC 12/13 (CP2K 2024.1 and its libraries predate GCC 14); fall back to 11, then 14
 G=\$(module avail gcc 2>&1 | grep -o "gcc/1[23][^ ]*" | sort -V | tail -1)
@@ -55,11 +55,13 @@ module load \$G; echo "using \$G: \$(gcc --version | head -1)"
 command -v python3 >/dev/null || module load python3/3.7.1   # CP2K make needs python3 (fypp)
 echo "python3: \$(command -v python3)"
 ./install_cp2k_toolchain.sh -j \$(nproc) --target-cpu=haswell --mpi-mode=openmpi --with-gcc=system \\
-    --with-openmpi=install --with-openblas=install --with-cmake=install --with-libgrpp=no
-cp install/arch/local.psmp ../../arch/
+    --with-openmpi=install --with-openblas=install --with-cmake=install --with-libgrpp=no \\
+    || { echo 'TOOLCHAIN FAILED'; exit 1; }
+cp install/arch/local.psmp ../../arch/ || exit 1
 source install/setup
 cd ../..
-make -j \$(nproc) ARCH=local VERSION=psmp
+make -j \$(nproc) ARCH=local VERSION=psmp || { echo 'CP2K MAKE FAILED'; exit 1; }
+[ -x exe/local/cp2k.psmp ] || { echo 'no cp2k.psmp'; exit 1; }
 ls -la exe/local/
 echo "module load \$G" > $DEST/cp2k-2024.1.env
 echo "source $CP2K/tools/toolchain/install/setup" >> $DEST/cp2k-2024.1.env
