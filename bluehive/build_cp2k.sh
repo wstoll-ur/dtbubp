@@ -1,7 +1,7 @@
 #!/bin/bash
 # Compile CP2K 2024.1 (the version of every Leonardo run) for the Broadwell Vermont nodes (RHEL 7.9, AVX2).
 # Built from source with the CP2K toolchain (GCC + OpenMPI 4.1.5 + OpenBLAS + ScaLAPACK + FFTW + libxc +
-# libint + libxsmm, all built locally; no libgrpp = ECP integrals, not needed with GTH) into  /home/$USER/Claude/cp2k-2024.1  on the node's own disk.
+# libint + libxsmm only (optional COSMA/ELPA/SIRIUS/HDF5/... off: not needed for GPW labels), all built locally; no libgrpp = ECP integrals, not needed with GTH) into  /home/$USER/Claude/cp2k-2024.1  on the node's own disk.
 # Nothing is installed into your existing environments.
 #
 #   bash bluehive/build_cp2k.sh fetch            # bluehive3: download source + toolchain packages (nodes may lack internet)
@@ -59,6 +59,9 @@ LI=install/libint-v2.6.0-cp2k-lmax-5
 if [ -d \$LI ] && [ -z "\$(find \$LI -name 'libint_f.mod' 2>/dev/null)" ]; then echo "removing incomplete \$LI"; rm -rf \$LI; fi
 ./install_cp2k_toolchain.sh -j \$(nproc) --target-cpu=haswell --mpi-mode=openmpi --with-gcc=system \\
     --with-openmpi=install --with-openblas=install --with-cmake=install --with-libgrpp=no \\
+    --with-cosma=no --with-elpa=no --with-sirius=no --with-hdf5=no --with-gsl=no --with-spglib=no \\
+    --with-libvdwxc=no --with-spfft=no --with-spla=no --with-libvori=no --with-plumed=no --with-quip=no \\
+    --with-pexsi=no --with-superlu=no --with-ptscotch=no --with-libtorch=no \\
     || { echo 'TOOLCHAIN FAILED'; exit 1; }
 [ -n "\$(find \$LI -name 'libint_f.mod')" ] || { echo 'libint Fortran module missing (see build/libint-*/make.log)'; exit 1; }
 cp install/arch/local.psmp ../../arch/ || exit 1
