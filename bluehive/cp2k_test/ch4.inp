@@ -18,9 +18,17 @@
       REL_CUTOFF 50
     &END MGRID
     &SCF
+      SCF_GUESS ATOMIC
       EPS_SCF 1.0E-6
+      MAX_SCF 50
       &OT
+        PRECONDITIONER FULL_ALL
+        MINIMIZER DIIS
       &END OT
+      &OUTER_SCF
+        MAX_SCF 10
+        EPS_SCF 1.0E-6
+      &END OUTER_SCF
     &END SCF
     &XC
       &XC_FUNCTIONAL PBE
