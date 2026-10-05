@@ -1,0 +1,97 @@
+# probe_vermont 2026-10-05T11:31:18-04:00 from bluehive3; repo /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp; SCRATCH=/scratch/wstoll
+
+################ bhx0123
+host bhx0123.bluehive.circ.private  nproc 24
+CPU(s):                24
+Core(s) per socket:    12
+Socket(s):             2
+NUMA node(s):          2
+Model name:            Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+              total        used        free      shared  buff/cache   available
+Mem:             62          10          49           1           1          49
+ 11:31:18 up 461 days, 16:39,  0 users,  load average: 6.62, 6.62, 6.60
+-- top cpu users
+USER     %CPU     ELAPSED COMMAND
+wstoll    0.0       00:00 bash
+wstoll    0.0       00:00 ps
+wstoll    0.0       00:00 head
+-- file systems
+/dev/mapper/system-local_scratch  1.8T  494G  1.3T  28% /local_scratch
+/dev/mapper/system-local_scratch  1.8T  494G  1.3T  28% /local_scratch
+/dev/mapper/system-root            20G  3.2G   17G  16% /
+/dev/mapper/system-local_scratch  1.8T  494G  1.3T  28% /local_scratch
+repo NOT visible: /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp
+repo NOT writable
+ls: cannot access /scratch/wstoll/containers: No such file or directory
+-- tools
+module is a function
+apptainer: which: no apptainer in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+singularity: which: no singularity in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+mpirun: which: no mpirun in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'apptainer/1.4.1'
+after module load: which: no apptainer in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+/dev/mapper/system-root   20G  3.2G   17G  16% /
+
+################ bhx0124
+host bhx0124.bluehive.circ.private  nproc 24
+CPU(s):                24
+Core(s) per socket:    12
+Socket(s):             2
+NUMA node(s):          2
+Model name:            Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+              total        used        free      shared  buff/cache   available
+Mem:             62          20          39           2           2          39
+ 11:31:21 up 353 days, 15 min,  0 users,  load average: 0.64, 0.67, 0.68
+-- top cpu users
+USER     %CPU     ELAPSED COMMAND
+wstoll    0.0       00:00 bash
+wstoll    0.0       00:00 ps
+wstoll    0.0       00:00 head
+-- file systems
+/dev/mapper/system-local_scratch  1.8T  416G  1.4T  23% /local_scratch
+/dev/mapper/system-local_scratch  1.8T  416G  1.4T  23% /local_scratch
+/dev/mapper/system-root            20G  3.1G   17G  16% /
+/dev/mapper/system-local_scratch  1.8T  416G  1.4T  23% /local_scratch
+repo NOT visible: /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp
+repo NOT writable
+ls: cannot access /scratch/wstoll/containers: No such file or directory
+-- tools
+module is a function
+apptainer: which: no apptainer in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+singularity: which: no singularity in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+mpirun: which: no mpirun in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'apptainer/1.4.1'
+after module load: which: no apptainer in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+/dev/mapper/system-root   20G  3.1G   17G  16% /
+
+################ bhx0125
+host bhx0125.bluehive.circ.private  nproc 24
+CPU(s):                24
+Core(s) per socket:    12
+Socket(s):             2
+NUMA node(s):          2
+Model name:            Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+              total        used        free      shared  buff/cache   available
+Mem:             62          11          49           1           1          49
+ 11:31:41 up 461 days, 16:40,  0 users,  load average: 0.69, 0.66, 0.68
+-- top cpu users
+USER     %CPU     ELAPSED COMMAND
+wstoll    0.0       00:00 bash
+wstoll    0.0       00:00 ps
+wstoll    0.0       00:00 head
+-- file systems
+/dev/mapper/system-local_scratch  1.8T  638G  1.2T  36% /local_scratch
+/dev/mapper/system-local_scratch  1.8T  638G  1.2T  36% /local_scratch
+/dev/mapper/system-root            20G  3.5G   17G  18% /
+/dev/mapper/system-local_scratch  1.8T  638G  1.2T  36% /local_scratch
+repo NOT visible: /gpfs/fs2/scratch/wstoll/DtBuDp/DtBuDp
+repo NOT writable
+ls: cannot access /scratch/wstoll/containers: No such file or directory
+-- tools
+module is a function
+apptainer: which: no apptainer in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+singularity: which: no singularity in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+mpirun: which: no mpirun in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'apptainer/1.4.1'
+after module load: which: no apptainer in (/software/firefox/current:/software/circ/bin:/xcatpost:/usr/bin:/bin:/sbin:/usr/sbin:/mnt/sysimage/bin:/mnt/sysimage/usr/bin:/mnt/sysimage/usr/sbin:/mnt/sysimage/sbin:/sbin:/usr/sbin:/xcatpost:/usr/lpp/mmfs/bin)
+/dev/mapper/system-root   20G  3.5G   17G  18% /
