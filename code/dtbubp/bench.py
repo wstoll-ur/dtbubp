@@ -57,15 +57,16 @@ def _levels(c: Campaign, only=None) -> list[dict]:
 def setup(c: Campaign, dry: bool = False, only=None) -> Path:
     dc = Campaign(c.p("dft_config"))
     dft, b = dc.cfg["dft"], c.cfg["bench"]
-    start = c.p("start_dir")
-    _, syms, pos = next(read_xyz(start / "coord.xyz"))
-    meta = json.loads((start / "meta.json").read_text())
-    cell = np.array(meta["cell"])
-    nmol = int(meta["n_molecules"])
     root = c.p("run_dir")
     root.mkdir(parents=True, exist_ok=True)
     names = []
     for lv in _levels(c, only):
+        # a level may start from its own structure (e.g. another level's last geometry): [[bench.levels]] start_dir
+        start = c.path(lv["start_dir"]) if lv.get("start_dir") else c.p("start_dir")
+        _, syms, pos = next(read_xyz(start / "coord.xyz"))
+        meta = json.loads((start / "meta.json").read_text())
+        cell = np.array(meta["cell"])
+        nmol = int(meta["n_molecules"])
         d = root / lv["name"]
         if (d / "output.out").exists() and not dry:
             print(f"{lv['name']}: already has output.out -> resubmitted as a continuation (restart file) if unfinished")

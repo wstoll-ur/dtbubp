@@ -1,5 +1,5 @@
 {
- "toml_sha256": "248bb9a31f0bb65eaf4edb0f411e0f10e12bb22843d5e3a7dc2919c1d0e82c33",
+ "toml_sha256": "b288fab3b0707016b88bc50decc698c2fd1295c32f58d42ef903db07f312c16f",
  "cfg": {
   "paths": {
    "code_dir": "../../code",
@@ -107,6 +107,15 @@
      "dispersion": "D3BJ",
      "c9": true,
      "basis": "DZVP-MOLOPT-SR-GTH"
+    },
+    {
+     "name": "12b_pbe_d3bj_c9_dzvpsr_from06",
+     "description": "= level 12 (PBE-D3(BJ)+C9, DZVP-MOLOPT-SR), started from the last geometry of level 06 (PBE-D3(BJ)/TZV2P, Leonardo step 154, 376 A^3/mol) instead of V430: fewer steps (Will, 2026-10-05)",
+     "functional": "PBE",
+     "dispersion": "D3BJ",
+     "c9": true,
+     "basis": "DZVP-MOLOPT-SR-GTH",
+     "start_dir": "starts/from_06_step154"
     }
    ]
   },

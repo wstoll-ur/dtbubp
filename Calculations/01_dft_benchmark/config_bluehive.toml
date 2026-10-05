@@ -109,6 +109,15 @@ dispersion = "D3BJ"
 c9 = true
 basis = "DZVP-MOLOPT-SR-GTH"
 
+[[bench.levels]]
+name = "12b_pbe_d3bj_c9_dzvpsr_from06"
+description = "= level 12 (PBE-D3(BJ)+C9, DZVP-MOLOPT-SR), started from the last geometry of level 06 (PBE-D3(BJ)/TZV2P, Leonardo step 154, 376 A^3/mol) instead of V430: fewer steps (Will, 2026-10-05)"
+functional = "PBE"
+dispersion = "D3BJ"
+c9 = true
+basis = "DZVP-MOLOPT-SR-GTH"
+start_dir = "starts/from_06_step154"
+
 [experiment]
 V_per_molecule_80K  = 400.9    # cooling curve (volume_vs_temperature_ONCOOLING.png), phase III region
 V_per_molecule_298K = 430.0    # 298k.cif, Z = 2
