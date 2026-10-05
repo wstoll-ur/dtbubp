@@ -34,7 +34,7 @@ def _pool_body(c: Campaign, workdir: Path, list_file: str) -> str:
     """Run the frames listed in `list_file` K at a time on one node.
 
     srun launcher (Leonardo): a queue feeding `srun --exact` job steps.
-    apptainer launcher (BlueHive): K lanes, lane i pinned to cores [i*R, (i+1)*R), each running its share
+    apptainer / mpirun launchers (BlueHive): K lanes, lane i pinned to cores [i*R, (i+1)*R), each running its share
     of the list one frame after the other (concurrent mpiruns must not share cores).
     """
     d = c.cfg["dft"]
@@ -42,7 +42,7 @@ def _pool_body(c: Campaign, workdir: Path, list_file: str) -> str:
     ranks = int(d["cores_per_node"]) // k
     mem = int(d["mem_per_node_gb"]) // k
     tmo = int(d["frame_timeout_min"])
-    if d.get("launcher", "srun") == "apptainer":
+    if d.get("launcher", "srun") in ("apptainer", "mpirun"):
         return _env(c) + f"""
 export OMP_NUM_THREADS=1
 cd {workdir}

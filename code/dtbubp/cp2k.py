@@ -273,12 +273,19 @@ def launch(dft: dict, ranks, extra: str = "", cpus: str | None = None) -> str:
     launcher = "srun" (default; Leonardo, CP2K module):
         srun <extra> --ntasks=R --cpus-per-task=1 <mpi_flags> <cp2k_exe>
         mpi_flags default "--mpi=pmi2 --cpu-bind=cores", cp2k_exe default "cp2k.popt"
-    launcher = "apptainer" (BlueHive: official CP2K container, single node per run):
+    launcher = "mpirun" (BlueHive Vermont nodes, outside Slurm, CP2K from their module):
+        mpirun -np R <mpi_pin with {cpus} -> "lo-hi"> <cp2k_exe>
+        mpi_pin default "--bind-to core --cpu-set {cpus}" (OpenMPI); Intel MPI: "-genv I_MPI_PIN_PROCESSOR_LIST {cpus}"
+    launcher = "apptainer" (official CP2K container, single node per run; not usable on BlueHive in the end):
         apptainer exec --cleanenv --env OMP_NUM_THREADS=1 <container> mpirun -np R --bind-to core
                        [--cpu-set <cpus>] <cp2k_exe>
         --cleanenv hides the Slurm variables, so the container's OpenMPI starts the ranks locally;
         `cpus` ("0-27") pins concurrent runs on one node to disjoint cores. cp2k_exe default "cp2k.psmp".
     """
+    if dft.get("launcher", "srun") == "mpirun":   # no Slurm (BlueHive Vermont nodes): plain local mpirun
+        exe = dft.get("cp2k_exe", "cp2k.psmp")
+        pin = dft.get("mpi_pin", "--bind-to core --cpu-set {cpus}") if cpus else ""
+        return " ".join(x for x in ("mpirun", f"-np {ranks}", pin.format(cpus=cpus), exe) if x)
     if dft.get("launcher", "srun") == "apptainer":
         exe = dft.get("cp2k_exe", "cp2k.psmp")
         cs = f"--cpu-set {cpus} " if cpus else ""

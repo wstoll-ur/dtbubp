@@ -45,3 +45,9 @@ def test_apptainer_launcher_and_lanes(tmp_path):
                "env": {"dft": "module load apptainer"}}
     b = _pool_body(C(), tmp_path, "chunk_0.txt")
     assert "--cpu-set $lo-$hi" in b and "lo=$(( $1 * 28 ))" in b and "seq 0 1" in b and "srun" not in b
+
+
+def test_mpirun_launcher():
+    assert cp2k.launch({"launcher": "mpirun"}, 12, cpus="12-23") == "mpirun -np 12 --bind-to core --cpu-set 12-23 cp2k.psmp"
+    d = {"launcher": "mpirun", "cp2k_exe": "cp2k.popt", "mpi_pin": "-genv I_MPI_PIN_PROCESSOR_LIST {cpus}"}
+    assert cp2k.launch(d, 24, cpus="0-23") == "mpirun -np 24 -genv I_MPI_PIN_PROCESSOR_LIST 0-23 cp2k.popt"

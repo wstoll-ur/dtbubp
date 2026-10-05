@@ -1,54 +1,77 @@
 #!/bin/bash
-# Run dtbubp job scripts on Vermont nodes (outside Slurm), like vermont_crystal.sh: nohup over ssh.
-# The job scripts written by dtbubp (`--dry-run` writes them without sbatch) are plain bash; #SBATCH lines are
-# comments. Array jobs are started once per node with SLURM_ARRAY_TASK_ID = 0, 1, ...
+# Run dtbubp job scripts on the BlueHive Vermont nodes (no Slurm, NO shared file system with bluehive3).
+# Like vermont_crystal.sh: copy the job folder to the node, start it with nohup over ssh, copy results back.
 #
-#   bash bluehive/vermont.sh run  <job_script.sh> "<node0> [node1 ...]"   # task i on node i
-#   bash bluehive/vermont.sh status                                       # what runs where (from the run registry)
-#   bash bluehive/vermont.sh kill <tag>                                   # stop one launch (all its nodes)
+#   bash bluehive/vermont.sh run  <job_script.sh> <node> [task_id]  # copy job folder -> node, start (task_id -> SLURM_ARRAY_TASK_ID)
+#   bash bluehive/vermont.sh pull [tag]                              # copy outputs back (all runs, or one)
+#   bash bluehive/vermont.sh watch [minutes]                         # pull every N min (default 30) until nothing runs
+#   bash bluehive/vermont.sh status                                  # running/finished + load per node
+#   bash bluehive/vermont.sh kill <tag>                              # stop a run (then pull)
 #
-# Needs: the repo on a file system the nodes see (probe_vermont.sh: "repo visible/writable").
-# Every launch is recorded in bluehive/vermont_runs/<tag>.txt (node, pid, script, task id, log file).
+# Job scripts are the ones dtbubp writes with --dry-run (plain bash; #SBATCH lines are comments).
+# On the node the repo root  <repo>  is replaced by  /home/$USER/dtbubp_runs  (node-local disk).
+# Runs are registered in bluehive/vermont_runs/<tag>.txt.
 set -u
 cd "$(git rev-parse --show-toplevel)" || exit 1
-REG=$PWD/bluehive/vermont_runs
+REPO=$PWD
+RROOT=/home/$USER/dtbubp_runs
+REG=$REPO/bluehive/vermont_runs
 mkdir -p $REG
+SSH="ssh -o BatchMode=yes -o ConnectTimeout=10"
 cmd=${1:-}; shift || true
+
+remote_of() { echo "$RROOT/${1#$REPO/}"; }
+
+pull_one() {   # $1 = registry file
+  read h pid script task ldir rdir < $1
+  rsync -a --update --exclude '*.wfn*' --exclude '*.bak-*' -e "$SSH" $h:$rdir/ $ldir/ \
+    && echo "pulled $(basename $1 .txt) from $h -> ${ldir#$REPO/}"
+}
 
 case "$cmd" in
 run)
-  script=$(realpath "$1"); nodes=$(echo "$2" | tr ',' ' ')
-  dir=$(dirname "$script"); name=$(basename "$script" .sh)
-  tag=${name}_$(date +%Y%m%d_%H%M%S)
-  i=0
-  for h in $nodes; do
-    log=$dir/${name}_vermont_${h}_task$i.log
-    pid=$(ssh -o BatchMode=yes $h "cd $dir && SLURM_ARRAY_TASK_ID=$i SLURM_JOB_ID=$tag setsid nohup bash -l $script > $log 2>&1 < /dev/null & echo \$!")
-    echo "$h $pid $script task=$i log=$log" | tee -a $REG/$tag.txt
-    i=$((i + 1))
-  done
-  echo "registered as $tag  (stop: bash bluehive/vermont.sh kill $tag)"
+  script=$(realpath "$1"); h=$2; task=${3:-0}
+  ldir=$(dirname "$script"); rdir=$(remote_of "$ldir"); name=$(basename "$script" .sh)
+  tag=${name}_${h}_t${task}_$(date +%m%d_%H%M%S)
+  $SSH $h "mkdir -p $rdir" || exit 1
+  # inputs (and any finished outputs, so finished frames are skipped); job script with node-local paths
+  rsync -a --exclude '*_vermont_*.log' -e "$SSH" $ldir/ $h:$rdir/ || exit 1
+  sed -e "s#$REPO#$RROOT#g" -e "s#/scratch/$USER/DtBuDp/DtBuDp#$RROOT#g" $script | $SSH $h "cat > $rdir/$name.vermont.sh"
+  log=$rdir/${name}_vermont_t$task.log
+  pid=$($SSH $h "cd $rdir && SLURM_ARRAY_TASK_ID=$task SLURM_JOB_ID=$tag setsid nohup bash -l $name.vermont.sh > $log 2>&1 < /dev/null & echo \$!")
+  echo "$h $pid $name task=$task $ldir $rdir" > $REG/$tag.txt
+  echo "started $tag: $h pid $pid, node dir $rdir, log $log"
+  ;;
+pull)
+  for f in $REG/${1:-*}.txt; do [ -f "$f" ] && pull_one $f; done
   ;;
 status)
   for f in $REG/*.txt; do
     [ -f "$f" ] || continue
-    echo "== $(basename $f .txt)"
-    while read h pid script task log; do
-      alive=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $h "ps -p $pid >/dev/null && echo running || echo finished")
-      load=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $h "cut -d' ' -f1 /proc/loadavg")
-      echo "  $h pid $pid $task: $alive (load $load)  ${log#log=}"
-    done < $f
+    read h pid script task ldir rdir < $f
+    st=$($SSH $h "ps -p $pid >/dev/null && echo RUNNING || echo finished; cut -d' ' -f1-3 /proc/loadavg" | tr '\n' ' ')
+    echo "$(basename $f .txt): $st  (${ldir#$REPO/})"
+  done
+  ;;
+watch)
+  m=${1:-30}
+  while :; do
+    for f in $REG/*.txt; do [ -f "$f" ] && pull_one $f; done
+    alive=0
+    for f in $REG/*.txt; do
+      [ -f "$f" ] || continue; read h pid rest < $f
+      $SSH $h "ps -p $pid >/dev/null" && alive=$((alive + 1))
+    done
+    echo "$(date '+%F %T') $alive run(s) still going"
+    [ $alive -eq 0 ] && break
+    sleep $((m * 60))
   done
   ;;
 kill)
   f=$REG/$1.txt; [ -f "$f" ] || { echo "no run $1"; exit 1; }
-  while read h pid script task log; do
-    echo "stopping $1 on $h (pid $pid)"
-    # the job script's process group, then any CP2K/mpirun left on that node by this user
-    ssh -o BatchMode=yes $h "pkill -TERM -g $pid 2>/dev/null; sleep 2; \
-         pkill -u $USER -f cp2k.psmp; pkill -u $USER -f 'mpirun -np'; true"
-  done < $f
-  mv $f $f.killed
+  read h pid rest < $f
+  $SSH $h "pkill -TERM -g $pid; sleep 3; pkill -KILL -g $pid; true"
+  pull_one $f; mv $f $f.killed; echo "stopped $1"
   ;;
-*) sed -n 2,12p "$0"; exit 1 ;;
+*) sed -n 2,14p "$0"; exit 1 ;;
 esac

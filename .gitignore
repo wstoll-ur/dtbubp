@@ -51,3 +51,5 @@ __pycache__/
 /bluehive/cp2k_test/*.log
 /bluehive/cp2k_test/test_job.sh
 /bluehive/vermont_runs/
+/bluehive/cp2k_test/slurm_test.sh
+/bluehive/cp2k_test/srun*/
