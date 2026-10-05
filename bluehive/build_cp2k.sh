@@ -55,6 +55,13 @@ module load \$G; echo "using \$G: \$(gcc --version | head -1)"
 # libint's Fortran interface is generated with the system 'python' (2.7): do NOT load the python3 module before
 # the toolchain (it breaks python 2 -> libint_f.mod missing; 1st build attempt). A libint install without the
 # Fortran module is removed so the toolchain rebuilds it.
+# python3 for the toolchain's arch-file generation and CP2K's fypp, WITHOUT the python3 module's environment
+# (which breaks the system python 2 that libint needs): a wrapper script in $DEST/bin.
+mkdir -p $DEST/bin
+printf '#!/bin/sh\nLD_LIBRARY_PATH=/software/python3/3.7.1/lib:\$LD_LIBRARY_PATH exec /software/python3/3.7.1/bin/python3 "\$@"\n' > $DEST/bin/python3
+chmod +x $DEST/bin/python3
+export PATH=$DEST/bin:\$PATH
+echo "python3 wrapper: \$(python3 --version 2>&1); python: \$(python --version 2>&1)"
 LI=install/libint-v2.6.0-cp2k-lmax-5
 if [ -d \$LI ] && [ -z "\$(find \$LI -name 'libint_f.mod' 2>/dev/null)" ]; then echo "removing incomplete \$LI"; rm -rf \$LI; fi
 ./install_cp2k_toolchain.sh -j \$(nproc) --target-cpu=haswell --mpi-mode=openmpi --with-gcc=system \\
@@ -66,7 +73,6 @@ if [ -d \$LI ] && [ -z "\$(find \$LI -name 'libint_f.mod' 2>/dev/null)" ]; then 
 [ -n "\$(find \$LI -name 'libint_f.mod')" ] || { echo 'libint Fortran module missing (see build/libint-*/make.log)'; exit 1; }
 cp install/arch/local.psmp ../../arch/ || exit 1
 source install/setup
-command -v python3 >/dev/null || module load python3/3.7.1   # CP2K make needs python3 (fypp)
 echo "python3: \$(command -v python3)"
 cd ../..
 make -j \$(nproc) ARCH=local VERSION=psmp || { echo 'CP2K MAKE FAILED'; exit 1; }
