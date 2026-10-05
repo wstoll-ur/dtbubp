@@ -1,8 +1,14 @@
-build start Mon Oct  5 11:45:47 EDT 2026 on bhx0123.bluehive.circ.private, 24 cores
-tar (child): bzip2: Cannot exec: No such file or directory
-tar (child): Error is not recoverable: exiting now
-tar: Child returned status 2
-tar: Error is not recoverable: exiting now
+build start Mon Oct  5 11:48:55 EDT 2026 on bhx0123.bluehive.circ.private, 24 cores
+tools on this node:
+  gzip     /usr/bin/gzip
+  bzip2    MISSING
+  unzip    MISSING
+  make     /usr/bin/make
+  patch    /usr/bin/patch
+  perl     /usr/bin/perl
+  python3  MISSING
+  wget     /usr/bin/wget
+  m4       /usr/bin/m4
+  git      MISSING
+/software/modules/init/bash: line 10: unalias: sudo: not found
 
-tar (child): Error is not recoverable: exiting now
-tar: Error is not recoverable: exiting now
