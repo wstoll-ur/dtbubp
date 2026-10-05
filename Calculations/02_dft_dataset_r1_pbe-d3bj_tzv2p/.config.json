@@ -1,5 +1,5 @@
 {
- "toml_sha256": "da6deeef500a9d8776579224540ef7f655c8fc5da2df0be7cb787c297eb6e06e",
+ "toml_sha256": "79236dcc382fcf7a6fb9d81c92efb6134ece86a91b74c4d21c70b04457ed3f9f",
  "cfg": {
   "paths": {
    "code_dir": "../../code",
@@ -55,14 +55,15 @@
    "debug_field_au": 0.0005,
    "max_force_ev_a": 25.0,
    "cores_per_node": 24,
-   "frames_per_node": 1,
-   "mem_per_node_gb": 180,
-   "frame_timeout_min": 300,
+   "frames_per_node": 2,
+   "mem_per_node_gb": 60,
+   "frame_timeout_min": 600,
    "chunks": 2,
-   "time_limit": "5-00:00:00",
-   "smoke_time_limit": "12:00:00",
-   "cp2k_exe": "cp2k.popt",
-   "mpi_flags": "--cpu-bind=cores",
+   "time_limit": "30-00:00:00",
+   "smoke_time_limit": "2-00:00:00",
+   "launcher": "mpirun",
+   "cp2k_exe": "cp2k.psmp",
+   "mpi_pin": "--bind-to core --cpu-set {cpus}",
    "linres": {
     "preconditioner": "FULL_ALL",
     "eps": "1.0E-08",
@@ -70,21 +71,16 @@
    }
   },
   "env": {
-   "dft": "module purge\nmodule load cp2k                      # CHECK exact module name/version\n",
+   "dft": "source $HOME/Claude/cp2k-2024.1.env\n",
    "mace": "module purge\nmodule load profile/base\nmodule load gcc/12.2.0\nmodule load cuda/12.6\nmodule load python/3.11.7\nsource $HOME/cp2k_torch_env/bin/activate\nexport PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True\n",
    "cp2k_mace": "module purge\nmodule load profile/base\nmodule load openmpi/4.1.6--gcc--12.2.0\nmodule load cuda/12.6\nmodule load python/3.11.7\nsource $HOME/cp2k_torch_env/bin/activate\n"
   },
   "slurm": {
    "cpu": {
     "account": "",
-    "partition": "standard",
+    "partition": "",
     "qos": "",
-    "extra": [
-     "--nodes=1",
-     "--ntasks-per-node=24",
-     "--cpus-per-task=1",
-     "--exclusive"
-    ]
+    "extra": []
    },
    "gpu": {
     "account": "IscrB_MET2SAF",

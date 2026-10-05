@@ -1,7 +1,7 @@
 # dtbubp campaign r1: RE-LABEL the same 2200 frames as r0 (2000 fix-deform + 200 strained) at the benchmark level
 # PBE-D3(BJ) / TZV2P-MOLOPT-GTH / GTH-PBE (bench level 06: static V/molecule -6.0 % vs 80 K, best of bench r1),
 # on BlueHive (University of Rochester CIRC). Every relative path is relative to THIS file's folder.
-# Differences from r0 (02_dft_dataset/config.toml): level of theory, packing/timing, env and slurm sections.
+# Differences from r0 (02_dft_dataset/config.toml): level of theory, packing/timing, launcher, env, slurm.
 
 [paths]
 code_dir              = "../../code"                      # this repository (put on PYTHONPATH by the jobs)
@@ -57,29 +57,29 @@ max_scf       = 50
 xc_smoothing  = true          # XC_DERIV NN10_SMOOTH + XC_SMOOTH_RHO NN10, as 9MA (the smoke test checks LINRES with it)
 debug_field_au = 0.0005       # smoke test: finite field for the polarizability check (a.u.)
 max_force_ev_a = 25.0         # drop a labelled frame above this (broken structure)
-# packing on BlueHive: one exclusive node runs `frames_per_node` frames at once.
-# CHECK after bluehive/probe.sh (cores and memory per node of the partition used).
-# Cost: TZV2P was ~12x DZVP-SR per CELL_OPT step on Leonardo; r0 labels took 6.7 min per frame on 28 ranks,
-# so expect very roughly 1-1.5 h per frame on ~28 ranks at TZV2P incl. LINRES. The smoke test gives the real number.
-cores_per_node    = 24        # CHECK
-frames_per_node   = 1         # CHECK: ranks per frame = cores_per_node / frames_per_node
-mem_per_node_gb   = 180       # CHECK
-frame_timeout_min = 300
-chunks            = 2         # array tasks = nodes used at once (Will: 3 free nodes, 1 kept for bench level 12)
-time_limit        = "5-00:00:00"   # CHECK partition max; re-running `label` skips finished frames
-smoke_time_limit  = "12:00:00"
-cp2k_exe          = "cp2k.popt"         # CHECK (a build may only ship cp2k.psmp)
-mpi_flags         = "--cpu-bind=cores"  # CHECK (Leonardo used --mpi=pmi2 --cpu-bind=cores)
+# packing on the BlueHive Vermont nodes bhx0123-0125 (outside Slurm, no shared file system; run with
+# bluehive/vermont.sh): 24 Broadwell cores and 62 GB each -> 2 frames at once, 12 MPI ranks each, pinned.
+# Cost: TZV2P was ~12x DZVP-SR per CELL_OPT step on Leonardo; r0 labels took 6.7 min per frame on 28 Leonardo
+# ranks -> r1 maybe 1.5-3 h per frame here. The smoke test gives the real number.
+cores_per_node    = 24
+frames_per_node   = 2
+mem_per_node_gb   = 60        # not enforced outside Slurm
+frame_timeout_min = 600
+chunks            = 2         # one chunk per label node (bhx0124, bhx0125); bhx0123 runs the bench
+time_limit        = "30-00:00:00"   # only written into #SBATCH lines (ignored on Vermont)
+smoke_time_limit  = "2-00:00:00"
+launcher          = "mpirun"        # plain local mpirun (no Slurm)
+cp2k_exe          = "cp2k.psmp"     # own build, bluehive/build_cp2k.sh (CP2K 2024.1, OpenMPI 4.1.5)
+mpi_pin           = "--bind-to core --cpu-set {cpus}"
 
 [dft.linres]
 preconditioner = "FULL_ALL"
 eps            = "1.0E-08"
 max_iter       = 300
 [env]
-# BlueHive. CHECK after bluehive/probe.sh: the module that provides CP2K, and CP2K_DATA_DIR.
+# BlueHive Vermont nodes: CP2K 2024.1 compiled by bluehive/build_cp2k.sh into the node-local /home/$USER/Claude
 dft = """
-module purge
-module load cp2k                      # CHECK exact module name/version
+source $HOME/Claude/cp2k-2024.1.env
 """
 # MACE training stays on Leonardo GPUs (still available); mace / cp2k_mace are only used there.
 mace = """
@@ -101,11 +101,11 @@ source $HOME/cp2k_torch_env/bin/activate
 """
 
 [slurm.cpu]
-# BlueHive. CHECK partition/account from bluehive/probe.sh (empty account = your default account)
+# not used: the Vermont nodes are outside Slurm (bluehive/vermont.sh runs the job scripts). Kept so scripts are valid.
 account   = ""
-partition = "standard"
+partition = ""
 qos       = ""
-extra     = ["--nodes=1", "--ntasks-per-node=24", "--cpus-per-task=1", "--exclusive"]
+extra     = []
 [slurm.gpu]
 # MACE training runs on Leonardo
 account   = "IscrB_MET2SAF"

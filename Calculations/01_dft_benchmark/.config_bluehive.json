@@ -1,5 +1,5 @@
 {
- "toml_sha256": "d4463d9d5bd27755b00c458be775b3ed7dfb4bbf638e81a9444a5c733ed86124",
+ "toml_sha256": "be956b1cffa613afd3ce1128ad798f6efb96e30f44457115cf7f4d3ca4f6fb45",
  "cfg": {
   "paths": {
    "code_dir": "../../code",
@@ -12,7 +12,7 @@
    "pressure_tol_bar": 100.0,
    "max_force_au": 0.00045,
    "ranks": 24,
-   "time_limit": "5-00:00:00",
+   "time_limit": "30-00:00:00",
    "levels": [
     {
      "name": "01_blyp_d3_dzvpsr",
