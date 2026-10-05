@@ -100,7 +100,7 @@ deploy)
   {
   # node -> bluehive3 scratch -> other nodes (the nodes may not have ssh keys for each other)
   STAGE=/scratch/$USER/cp2k_build_copy; mkdir -p $STAGE
-  rsync -a --exclude 'tools/toolchain/build' --exclude 'obj' -e "$SSH" $H:$CP2K $H:$DEST/cp2k-2024.1.env $STAGE/ && echo "copied from $H"
+  rsync -a --exclude 'tools/toolchain/build' --exclude 'obj' --exclude 'lib/local' -e "$SSH" $H:$CP2K $H:$DEST/cp2k-2024.1.env $STAGE/ && echo "copied from $H"
   for h in $OTHERS; do
     echo "## copy -> $h"
     $SSH $h "mkdir -p $DEST" && rsync -a -e "$SSH" $STAGE/ $h:$DEST/ && echo ok
