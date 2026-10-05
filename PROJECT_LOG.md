@@ -756,6 +756,13 @@ Reuse from 9MA: `npt_al.py` (driver pattern, CP2K parsers, stress conversion, Sl
 
 ---
 
+### 2026-10-05 — Level 12 warm start from level 06 prepared (Codex; Will to run on BlueHive)
+- Will requested restarting the running Vermont level-12 optimisation from level 06's latest saved geometry to reduce optimisation time.
+- Added `bluehive/start_level12_from06.sh`: self-contained cell vectors and 92 Cartesian atomic positions extracted from the local `06_pbe_d3bj_tzv2p/bench-1.restart` (saved step 154, not fully converged; 376.3772 Å³/molecule).
+- Retains level 12 PBE-D3(BJ)+C9 / DZVP-MOLOPT-SR-GTH settings and a fresh ATOMIC SCF guess. Creates a separate timestamped `01_dft_benchmark/from06_*/` directory to prevent the existing level-12 restart from overriding the seed. Uses 24 MPI ranks on bhx0124, following the latest cluster update.
+- Verified preparation in an isolated temporary repository, atom count, target electronic settings, absence of inherited restart files, and shell syntax. Will stops the existing registered run and launches the replacement after pulling GitHub; Codex has not changed the remote running job.
+- GitHub workflow (Will's preference): Codex maintains a separate checkout outside Box, copies only intended changes into it, and commits/pushes scripts so BlueHive can pull. Check remote changes before each push; do not overwrite newer Claude or BlueHive updates.
+
 ## 10. References
 
 - [CP2K-POLAR] CP2K manual, FORCE_EVAL/PROPERTIES/LINRES/POLAR (`DO_RAMAN`, `PERIODIC_DIPOLE_OPERATOR` = Berry phase) — https://manual.cp2k.org/trunk/CP2K_INPUT/FORCE_EVAL/PROPERTIES/LINRES/POLAR.html
