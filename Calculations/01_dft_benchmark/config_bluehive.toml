@@ -15,8 +15,8 @@ run_dir    = "cellopt"                                     # one sub-folder per 
 max_iter         = 300
 pressure_tol_bar = 100.0      # 0.01 GPa
 max_force_au     = 4.5E-4     # Ha/Bohr (CP2K default, 0.023 eV/A)
-ranks            = 24         # ONE Vermont node (bhx0123). 3 nodes over 10 GbE were slower (2026-10-05 timing:
-                              # ~13 s vs ~17 s per SCF iteration, identical energies)
+ranks            = 24         # ONE Vermont node (level 12 runs on bhx0124: ~5 s per SCF iteration; bhx0123 is
+                              # shared with another user's hidden job, ~20 s). 3-node runs over 10 GbE were slower.
 # multi-node settings kept for reference; set hosts to use them again
 # hosts          = "bhx0123:24,bhx0124:24,bhx0125:24"
 mpi_prefix       = "/home/wstoll/Claude/cp2k-2024.1/tools/toolchain/install/openmpi-4.1.5"
