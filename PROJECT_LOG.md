@@ -804,6 +804,13 @@ Reuse from 9MA: `npt_al.py` (driver pattern, CP2K parsers, stress conversion, Sl
 - Synthetic integration checks passed: matching duplicate deduplication, completed-but-SCF-failed exclusion, exact pending IDs, energy/force/stress collection, wrong-C9-input rejection. Shell syntax passed. Actual node outputs still need packaging on bluehive3; no remote transfer, job stop, DFT or fit performed by Codex.
 - Next: run packaging on bluehive3; copy archive and checksum to Box via Mac, then DGX. Review manifest and validate the r2 deck against a completed BlueHive reference on DGX before pending labeling. Preserve existing labels and original splits; do not inherit the Berkeley BLYP reference. Reconcile continued bhx0123 work before launching the pending list.
 
+### 2026-10-08 — DtBuBP unbiased DGX thermal learning prepared (Will, Codex)
+- User requested the newer DGX workflow without a CV/bias and active learning over50–300K; explicitly chose existing packing only. Verified transfer archive:1690 accepted labels,510 pending,2200selected.
+- Prepared separate DGX active_learning/dtbubp workflow/config/tests plus private checkout/snapshot preparation and detached launchscripts. Preserve r2 PBE-D3(BJ)+C9/DZVP-SR600/60NN10 reference and originalheldouts. Preflight crosschecks BlueHive/DGX and variable-cellwavefunctionreuse before completing510frames and fitting.
+- Eleven25K-spaced temperatures, two unbiased10ps NPT_F pilots perT, full736atom freshDFT targets and pre-fiterrors, cumulativefoundation-startrefits. AllT pilotpass triggers independenttwo100psreplicas/T plus freshDFT/volumevalidation; failure adds safe labels and repeats (max8cycles). NoCV/OPES/NEB or othermateriallabels/models. Details and launchcommands:DGX/active_learning/dtbubp/README.md; continuingDGXrecord:DGX/LOG.md.
+-13newtests and shellsyntax passed; actualarchiveimport/hash/split/moleculechecks passed. ExistingDGXbackend55tests passed, oneexistingtest unavailable due missingTorch in localreviewvenv. No remoteDFT/training/MD launched. User must pull tools into cleanDGX-reporting, run scripts/dgx_prepare_dtbubp.sh, then the detached dgx_dtbubp_al.sh run stage in dedicatedDGX-dtbubp checkout.
+- This assesses chosenDFT/classicalNPT of existingpacking, not experimentalphase/quantum accuracy. Preserve originaldata and reconcile any ongoingBlueHivechunk before pendingDGXlabels.
+
 ## 10. References
 
 - [CP2K-POLAR] CP2K manual, FORCE_EVAL/PROPERTIES/LINRES/POLAR (`DO_RAMAN`, `PERIODIC_DIPOLE_OPERATOR` = Berry phase) — https://manual.cp2k.org/trunk/CP2K_INPUT/FORCE_EVAL/PROPERTIES/LINRES/POLAR.html
